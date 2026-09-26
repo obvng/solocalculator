@@ -1,0 +1,22 @@
+.viewport { min-height: 100vh; padding: 30px 36px; }
+.shell { width: min(100%, 1100px); margin: 0 auto; overflow: hidden; border-radius: 24px; background: rgba(255,255,255,.9); box-shadow: 0 20px 60px rgba(50,102,161,.14); }
+.hero { position: relative; display: grid; grid-template-columns: .82fr 1.18fr; gap: 56px; align-items: center; min-height: 560px; padding: 54px 72px; background: radial-gradient(circle at 82% 16%, rgba(202,187,255,.34), transparent 34%), linear-gradient(120deg,#effaff,#edf7ff 52%,#f0edff); }
+.hero::before, .hero::after { content:""; position:absolute; border-radius:50%; filter:blur(1px); pointer-events:none; }
+.hero::before { width:110px; height:110px; left:-45px; top:95px; background:rgba(88,177,255,.18); }
+.hero::after { width:90px; height:90px; right:-25px; bottom:50px; background:rgba(167,120,255,.18); }
+.copy { position:relative; z-index:2; }
+.crumb { color:#52749a; font-size:.78rem; font-weight:800; }
+.crumb a { color:#0967f2; text-decoration:none; }
+.copy h1 { margin:18px 0 14px; font-size:clamp(2.45rem,5vw,4.3rem); line-height:.96; letter-spacing:-.055em; }
+.copy p { margin:0; color:#274d7a; font-size:1.08rem; font-weight:650; line-height:1.55; }
+.blue h1 { color:#0967f2; }.coral h1 { color:#e9563b; }.mint h1 { color:#14976b; }.lilac h1 { color:#7745db; }.yellow h1 { color:#d89300; }
+.tool { position:relative; z-index:3; }
+.content { display:grid; grid-template-columns:1.5fr 1fr; gap:54px; padding:46px 72px 60px; }
+.content h2 { margin:0 0 10px; font-size:1.35rem; }
+.content article h2:not(:first-child) { margin-top:30px; }
+.content p { margin:0; color:#365983; line-height:1.7; }
+.content aside { display:grid; align-content:start; gap:9px; }
+.content aside a { display:flex; justify-content:space-between; align-items:center; min-height:50px; padding:0 15px; border:1px solid #d7e7f4; border-radius:11px; background:#f8fcff; font-weight:800; text-decoration:none; }
+.content aside svg { width:17px; color:#0967f2; }
+@media (max-width:800px) { .hero { grid-template-columns:1fr; gap:28px; padding:34px 24px; }.copy { text-align:center; }.copy h1 { font-size:2.7rem; }.content { grid-template-columns:1fr; padding:34px 24px; } }
+@media (max-width:700px) { .viewport { padding:0; }.shell { border-radius:0; box-shadow:none; }.hero { padding:24px 12px 30px; }.copy h1 { margin:12px 0 10px; font-size:2.25rem; }.copy p { font-size:.92rem; }.content { gap:32px; padding:30px 18px 44px; } }

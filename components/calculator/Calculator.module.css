@@ -1,0 +1,214 @@
+.shell {
+  width: min(100%, 432px);
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 26px;
+  background: rgba(250, 252, 255, 0.82);
+  box-shadow: 0 18px 38px rgba(43, 93, 154, 0.14), inset 0 1px 0 white;
+  backdrop-filter: blur(15px);
+}
+
+.display {
+  display: grid;
+  grid-template-rows: 18px 1fr;
+  align-items: center;
+  justify-items: end;
+  height: 78px;
+  overflow: hidden;
+  padding: 0 20px;
+  border: 1px solid #acd6f7;
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(220, 246, 255, 0.95), rgba(205, 238, 255, 0.76));
+  box-shadow: inset 0 3px 9px rgba(31, 115, 193, 0.13);
+  color: #07164f;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.expression {
+  align-self: end;
+  max-width: 100%;
+  overflow: hidden;
+  color: #55749a;
+  font-size: .72rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+}
+
+.result {
+  overflow: hidden;
+  font-size: clamp(2.15rem, 4vw, 3.25rem);
+  font-weight: 850;
+  letter-spacing: .015em;
+  line-height: 1;
+  text-overflow: ellipsis;
+}
+
+.controlBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 50px;
+}
+
+.modeToggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #07164f;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modeToggle input {
+  position: absolute;
+  opacity: 0;
+}
+
+.track {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  border: 1px solid #aec6e2;
+  border-radius: 99px;
+  background: #b8cbe2;
+  box-shadow: inset 0 2px 4px rgba(13, 44, 92, 0.13);
+  transition: background 180ms ease;
+}
+
+.track span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(3, 24, 75, 0.22);
+  transition: transform 180ms ease;
+}
+
+.modeToggle input:checked + .track { background: #1677ff; }
+.modeToggle input:checked + .track span { transform: translateX(16px); }
+.modeToggle input:focus-visible + .track { outline: 3px solid rgba(22, 119, 255, 0.25); outline-offset: 2px; }
+
+.memoryRow { display: flex; gap: 6px; }
+.memoryRow button,
+.scientificPanel button {
+  min-width: 42px;
+  height: 28px;
+  border: 1px solid #c8dcef;
+  border-radius: 9px;
+  background: linear-gradient(#fff, #edf6ff);
+  color: #07164f;
+  font: inherit;
+  font-size: 0.77rem;
+  font-weight: 700;
+  box-shadow: 0 2px 5px rgba(37, 79, 129, 0.08);
+  cursor: pointer;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.keypad button {
+  min-width: 0;
+  height: 60px;
+  border-radius: 12px;
+  color: #07164f;
+  font: inherit;
+  font-size: 1.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.numberKey {
+  border: 1px solid #d1dfed;
+  background: linear-gradient(145deg, #ffffff, #eef4fa);
+  box-shadow: 0 4px 8px rgba(31, 66, 114, 0.12), inset 0 1px 0 white;
+}
+
+.operatorKey {
+  border: 1px solid #aed9f3;
+  background: linear-gradient(145deg, #f4fbff, #dff2fd);
+  box-shadow: 0 4px 8px rgba(31, 102, 163, 0.11), inset 0 1px 0 white;
+  color: #0967f2 !important;
+}
+
+.clearKey {
+  border: 1px solid #ff8f72;
+  background: linear-gradient(145deg, #ffae91, #ff6d51);
+  box-shadow: 0 5px 10px rgba(255, 101, 70, 0.25), inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+.equalsKey {
+  grid-column: 5;
+  grid-row: 4;
+  border: 1px solid #0062ed;
+  background: linear-gradient(145deg, #368cff, #0061ef);
+  box-shadow: 0 7px 12px rgba(0, 92, 235, 0.28), inset 0 1px 0 rgba(255,255,255,.35);
+  color: #fff !important;
+}
+
+.zeroKey { grid-column: span 2; }
+
+.keypad button:active,
+.memoryRow button:active,
+.scientificPanel button:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 5px rgba(7, 22, 79, 0.14);
+}
+
+.keypad button:focus-visible,
+.memoryRow button:focus-visible,
+.scientificPanel button:focus-visible {
+  outline: 3px solid rgba(22, 119, 255, 0.3);
+  outline-offset: 2px;
+}
+
+.scientificPanel {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 220ms ease, opacity 160ms ease, margin 220ms ease;
+}
+
+.expanded .scientificPanel {
+  max-height: 150px;
+  margin-top: 10px;
+  opacity: 1;
+}
+
+.scientificPanel button { height: 30px; }
+
+@media (max-width: 700px) {
+  .shell { width: 100%; padding: 12px; border-radius: 18px; }
+  .display { height: 64px; grid-template-rows: 15px 1fr; border-radius: 12px; padding: 0 14px; }
+  .expression { font-size: .62rem; }
+  .result { font-size: 2.25rem; }
+  .controlBar { min-height: 43px; }
+  .modeToggle { gap: 6px; font-size: 0.68rem; }
+  .track { width: 34px; height: 20px; }
+  .track span { width: 14px; height: 14px; top: 2px; left: 2px; }
+  .modeToggle input:checked + .track span { transform: translateX(14px); }
+  .memoryRow { gap: 4px; }
+  .memoryRow button { min-width: 34px; height: 24px; padding: 0 5px; font-size: 0.64rem; }
+  .keypad { gap: 5px; }
+  .keypad button { height: 44px; border-radius: 9px; font-size: 1.25rem; }
+  .scientificPanel { gap: 5px; }
+  .expanded .scientificPanel { max-height: 145px; }
+  .scientificPanel button { min-width: 0; padding: 0 2px; font-size: 0.64rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track, .track span, .keypad button, .scientificPanel { transition: none; }
+}

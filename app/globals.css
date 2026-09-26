@@ -1,0 +1,26 @@
+:root {
+  --navy: #07164f;
+  --blue: #0967f2;
+  --coral: #ff7358;
+  --yellow: #ffbe24;
+  --mint: #42c894;
+  --lilac: #9365ed;
+  --sky: #eaf6ff;
+  --white: #fcfdfe;
+}
+
+* { box-sizing: border-box; }
+html { min-width: 320px; background: #eaf5ff; }
+body {
+  margin: 0;
+  color: var(--navy);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(167, 220, 255, .72), transparent 31%),
+    radial-gradient(circle at 84% 9%, rgba(208, 191, 255, .62), transparent 34%),
+    #edf7ff;
+  font-family: "Nunito Sans Variable", "Arial Rounded MT Bold", Arial, sans-serif;
+}
+button, input { font-family: inherit; }
+a { color: inherit; }
+
+@media (max-width: 700px) { body { background: #f6fbff; } }
