@@ -43,7 +43,7 @@ export async function getPublishedPostBySlug(slug: string): Promise<PostRecord |
   try {
     const { createServerClient } = await import("@/lib/supabase/server");
     const supabase = await createServerClient();
-    const { data } = await supabase.from("posts").select("*").eq("slug", slug).eq("status", "published").lte("published_at", new Date().toISOString()).maybeSingle();
+    const { data } = await supabase.from("post_revisions").select("*").eq("slug", slug).eq("is_current", true).lte("published_at", new Date().toISOString()).maybeSingle();
     return data as unknown as PostRecord | null;
   } catch { return null; }
 }
@@ -52,7 +52,7 @@ export async function listPublishedPosts(): Promise<PostRecord[]> {
   try {
     const { createServerClient } = await import("@/lib/supabase/server");
     const supabase = await createServerClient();
-    const { data } = await supabase.from("posts").select("*").eq("status", "published").lte("published_at", new Date().toISOString()).order("published_at", { ascending: false });
+    const { data } = await supabase.from("post_revisions").select("*").eq("is_current", true).lte("published_at", new Date().toISOString()).order("published_at", { ascending: false });
     return (data ?? []) as unknown as PostRecord[];
   } catch { return []; }
 }

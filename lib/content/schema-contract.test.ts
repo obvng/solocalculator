@@ -10,6 +10,7 @@ describe("content schema", () => {
   it.each([
     "profiles",
     "posts",
+    "post_revisions",
     "page_seo",
     "categories",
     "tags",

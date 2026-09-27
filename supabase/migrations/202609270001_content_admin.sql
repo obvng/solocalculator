@@ -46,6 +46,18 @@ create table public.posts (
 create unique index posts_slug_unique on public.posts (lower(slug));
 create index posts_publication_index on public.posts (status, published_at desc);
 
+create table public.post_revisions (
+  id uuid primary key default gen_random_uuid(), post_id uuid not null references public.posts(id) on delete cascade,
+  revision integer not null check (revision > 0), title text not null, slug text not null,
+  excerpt text not null default '', sanitized_html text not null, author_display_name text not null,
+  featured_image_id uuid references public.media(id) on delete restrict, social_image_id uuid references public.media(id) on delete restrict,
+  seo jsonb not null default '{}'::jsonb, related_page_keys text[] not null default '{}', related_post_ids uuid[] not null default '{}',
+  published_at timestamptz not null default now(), is_current boolean not null default true,
+  unique (post_id, revision)
+);
+create unique index post_revisions_current_unique on public.post_revisions (post_id) where is_current;
+create unique index post_revisions_current_slug_unique on public.post_revisions (lower(slug)) where is_current;
+
 create table public.page_seo (
   id uuid primary key default gen_random_uuid(), page_key text not null unique,
   pathname text not null unique check (pathname like '/%'), browser_title text not null default '',
@@ -113,6 +125,7 @@ create trigger set_site_settings_updated_at before update on public.site_setting
 alter table public.profiles enable row level security;
 alter table public.media enable row level security;
 alter table public.posts enable row level security;
+alter table public.post_revisions enable row level security;
 alter table public.page_seo enable row level security;
 alter table public.categories enable row level security;
 alter table public.tags enable row level security;
@@ -128,8 +141,8 @@ create policy "owner inserts profiles" on public.profiles for insert to authenti
 create policy "owner updates profiles" on public.profiles for update to authenticated using ((select public.is_owner())) with check ((select public.is_owner()));
 create policy "owner deletes profiles" on public.profiles for delete to authenticated using ((select public.is_owner()));
 create policy "public reads media metadata" on public.media for select to anon, authenticated using (true);
-create policy "public reads published posts" on public.posts for select to anon, authenticated using (status = 'published' and published_at <= now());
 create policy "owner reads every post" on public.posts for select to authenticated using ((select public.is_owner()));
+create policy "public reads published posts" on public.post_revisions for select to anon, authenticated using (is_current and published_at <= now());
 create policy "public reads page seo" on public.page_seo for select to anon, authenticated using (true);
 create policy "public reads categories" on public.categories for select to anon, authenticated using (true);
 create policy "public reads tags" on public.tags for select to anon, authenticated using (true);
@@ -141,7 +154,7 @@ create policy "public reads site settings" on public.site_settings for select to
 do $$
 declare table_name text;
 begin
-  foreach table_name in array array['media','posts','page_seo','categories','tags','post_categories','post_tags','redirects','redirect_history','site_settings','seo_audit_results'] loop
+  foreach table_name in array array['media','posts','post_revisions','page_seo','categories','tags','post_categories','post_tags','redirects','redirect_history','site_settings','seo_audit_results'] loop
     execute format('create policy "owner inserts %1$s" on public.%1$I for insert to authenticated with check ((select public.is_owner()))', table_name);
     execute format('create policy "owner updates %1$s" on public.%1$I for update to authenticated using ((select public.is_owner())) with check ((select public.is_owner()))', table_name);
     execute format('create policy "owner deletes %1$s" on public.%1$I for delete to authenticated using ((select public.is_owner()))', table_name);
@@ -152,9 +165,26 @@ grant usage on schema public to anon, authenticated;
 grant select on public.media to anon, authenticated;
 grant select on public.posts to anon, authenticated;
 grant insert, update, delete on public.posts to authenticated;
+grant select on public.post_revisions to anon, authenticated;
+grant insert, update, delete on public.post_revisions to authenticated;
 grant select on public.page_seo, public.categories, public.tags, public.post_categories, public.post_tags, public.redirects, public.site_settings to anon, authenticated;
 grant select, insert, update, delete on public.profiles, public.media, public.page_seo, public.categories, public.tags, public.post_categories, public.post_tags, public.redirects, public.redirect_history, public.site_settings, public.seo_audit_results to authenticated;
 grant usage, select on all sequences in schema public to authenticated;
+
+create or replace function public.publish_post(p_post_id uuid)
+returns void language plpgsql security invoker set search_path = '' as $$
+declare next_revision integer;
+begin
+  if not (select public.is_owner()) then raise exception 'owner access required'; end if;
+  select coalesce(max(revision), 0) + 1 into next_revision from public.post_revisions where post_id = p_post_id;
+  update public.post_revisions set is_current = false where post_id = p_post_id and is_current;
+  insert into public.post_revisions (post_id, revision, title, slug, excerpt, sanitized_html, author_display_name, featured_image_id, social_image_id, seo, related_page_keys, related_post_ids, published_at, is_current)
+  select id, next_revision, title, slug, excerpt, sanitized_html, author_display_name, featured_image_id, social_image_id, seo, related_page_keys, related_post_ids, coalesce(published_at, now()), true
+  from public.posts where id = p_post_id and status = 'published';
+  if not found then raise exception 'publishable post not found'; end if;
+end $$;
+revoke execute on function public.publish_post(uuid) from public, anon;
+grant execute on function public.publish_post(uuid) to authenticated;
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('media', 'media', true, 10485760, array['image/jpeg','image/png','image/webp','image/gif'])
