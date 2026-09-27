@@ -39,7 +39,7 @@ export const postInputSchema = z.object({
   excerpt: z.string().max(600).optional().default(""),
   sanitizedHtml: z.string().optional().default(""),
   status: z.enum(["draft", "scheduled", "published", "archived"]),
-  seo: seoInputSchema.optional().default({}),
+  seo: seoInputSchema.optional(),
 }).superRefine((post, context) => {
   if (post.slug && !slugPattern.test(post.slug)) {
     context.addIssue({ code: "custom", path: ["slug"], message: "Use lowercase words separated by hyphens." });
