@@ -20,8 +20,9 @@ export function absoluteUrl(value: string | undefined, fallbackPath = "/"): stri
   }
 }
 
-function applyTitleTemplate(title: string, template: string): string {
+function applyTitleTemplate(title: string, template: string, siteName: string): string {
   if (!title) return "";
+  if (title.toLowerCase().includes(siteName.toLowerCase())) return title;
   return template.includes("%s") ? template.replace("%s", title) : `${title} | ${template}`;
 }
 
@@ -38,7 +39,7 @@ export function toNextMetadata(
   const xCardImage = images?.xCard || openGraphImage;
 
   return {
-    title: applyTitleTemplate(title, defaults.titleTemplate),
+    title: applyTitleTemplate(title, defaults.titleTemplate, defaults.siteName),
     description,
     alternates: { canonical },
     robots: { index: !seo.noIndex, follow: !seo.noFollow },

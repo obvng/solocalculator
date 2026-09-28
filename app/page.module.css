@@ -129,6 +129,8 @@
 .quickCard strong { font-size: .95rem; }
 .quickCard small { margin-top: 4px; color: #365983; font-size: .76rem; }
 .quickCard > svg { width: 20px; color: #0871f7; }
+.seoContent { background: #fff; border-top: 1px solid #e1edf8; padding: 40px 72px 52px; }
+.seoContent > div { margin: 0 auto; max-width: 900px; }
 
 @media (max-width: 900px) {
   .hero { padding-inline: 38px; grid-template-columns: .85fr 1.15fr; gap: 20px; }
@@ -179,6 +181,7 @@
   .quickCard strong { font-size: .78rem; }
   .quickCard small { display: none; }
   .quickCard > svg { width: 17px; }
+  .seoContent { padding: 30px 20px 42px; }
 }
 
 @media (max-width: 370px) {

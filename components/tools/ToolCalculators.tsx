@@ -44,17 +44,17 @@ function AgeCalculator() {
 
 function PercentageCalculator() {
   const [mode, setMode] = useState<PercentageMode>("percentOf");
-  const [first, setFirst] = useState("20");
-  const [second, setSecond] = useState("150");
+  const [first, setFirst] = useState("0");
+  const [second, setSecond] = useState("0");
   const result = useMemo(() => { try { return calculatePercentage(mode, number(first), number(second)); } catch { return null; } }, [mode, first, second]);
   const labels = mode === "percentOf" ? ["Percentage", "Number"] : mode === "whatPercent" ? ["First number", "Second number"] : ["Starting value", "New value"];
   return <div className={styles.form}><Select label="Calculation" value={mode} onChange={(value) => setMode(value as PercentageMode)}><option value="percentOf">What is X% of Y?</option><option value="whatPercent">X is what percent of Y?</option><option value="change">Percentage change</option></Select><div className={styles.twoCols}><Field label={labels[0]} value={first} onChange={setFirst} /><Field label={labels[1]} value={second} onChange={setSecond} /></div><Result label="Result">{result === null ? "Check the values" : `${neat(result)}${mode === "percentOf" ? "" : "%"}`}</Result></div>;
 }
 
 function LoanCalculator() {
-  const [principal, setPrincipal] = useState("200000");
-  const [rate, setRate] = useState("6");
-  const [years, setYears] = useState("30");
+  const [principal, setPrincipal] = useState("0");
+  const [rate, setRate] = useState("0");
+  const [years, setYears] = useState("0");
   const result = useMemo(() => { try { return calculateLoan(number(principal), number(rate), number(years)); } catch { return null; } }, [principal, rate, years]);
   return <div className={styles.form}><Field label="Loan amount" value={principal} onChange={setPrincipal} min="1" /><div className={styles.twoCols}><Field label="Annual interest (%)" value={rate} onChange={setRate} min="0" step="0.1" /><Field label="Term (years)" value={years} onChange={setYears} min="1" /></div><Result label="Estimated monthly payment">{result ? money(result.monthlyPayment) : "Check the values"}{result && <span className={styles.resultGrid}><span>Total paid <b>{money(result.totalPayment)}</b></span><span>Total interest <b>{money(result.totalInterest)}</b></span></span>}</Result></div>;
 }
@@ -63,14 +63,14 @@ function DateCalculator() {
   const [mode, setMode] = useState("add");
   const [first, setFirst] = useState(today());
   const [second, setSecond] = useState(today());
-  const [offset, setOffset] = useState("10");
+  const [offset, setOffset] = useState("0");
   const result = mode === "add" ? addToDate(first, number(offset)) : `${Math.abs(daysBetween(first, second))} days`;
   return <div className={styles.form}><Select label="Calculation" value={mode} onChange={setMode}><option value="add">Add or subtract days</option><option value="between">Days between dates</option></Select><div className={styles.twoCols}><Field label="Starting date" type="date" value={first} onChange={setFirst} />{mode === "add" ? <Field label="Days (use a negative number to subtract)" value={offset} onChange={setOffset} /> : <Field label="Ending date" type="date" value={second} onChange={setSecond} />}</div><Result label="Result">{result}</Result></div>;
 }
 
 function UnitConverter() {
   const [category, setCategory] = useState<UnitCategory>("length");
-  const [value, setValue] = useState("1");
+  const [value, setValue] = useState("0");
   const options = unitOptions[category];
   const [from, setFrom] = useState(options[0]);
   const [to, setTo] = useState(options[1]);
@@ -81,7 +81,7 @@ function UnitConverter() {
 
 const currencies = ["USD", "EUR", "GBP", "NGN", "GHS", "KES", "ZAR", "CAD", "AUD", "JPY", "CNY", "INR"];
 function CurrencyConverter() {
-  const [amount, setAmount] = useState("100");
+  const [amount, setAmount] = useState("0");
   const [from, setFrom] = useState("USD");
   const [to, setTo] = useState("NGN");
   const pair = `${from}-${to}`;
@@ -101,9 +101,9 @@ function CurrencyConverter() {
 }
 
 function TipCalculator() {
-  const [bill, setBill] = useState("100");
-  const [tip, setTip] = useState("20");
-  const [people, setPeople] = useState("4");
+  const [bill, setBill] = useState("0");
+  const [tip, setTip] = useState("0");
+  const [people, setPeople] = useState("1");
   const result = useMemo(() => { try { return calculateTip(number(bill), number(tip), number(people)); } catch { return null; } }, [bill, tip, people]);
   return <div className={styles.form}><Field label="Bill amount" value={bill} onChange={setBill} min="0" /><div className={styles.twoCols}><Field label="Tip (%)" value={tip} onChange={setTip} min="0" /><Field label="People" value={people} onChange={setPeople} min="1" /></div><Result label="Each person pays">{result ? money(result.perPerson) : "Check the values"}{result && <span>Tip {money(result.tip)} · Total {money(result.total)}</span>}</Result></div>;
 }

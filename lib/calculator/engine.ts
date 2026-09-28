@@ -40,7 +40,7 @@ export interface CalculatorState {
 }
 
 export const initialCalculatorState: CalculatorState = {
-  display: "1,248.50",
+  display: "0",
   expression: "",
   accumulator: null,
   pendingOperator: null,

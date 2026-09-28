@@ -14,4 +14,9 @@ describe("toNextMetadata", () => {
     expect(metadata.robots).toEqual({ index: false, follow: false });
     expect(metadata.openGraph).toEqual(expect.objectContaining({ title: "Guide", description: "Guide description", url: "https://www.solocalculator.com/blog/guide" }));
   });
+
+  it("does not append the site name twice", () => {
+    const metadata = toNextMetadata({ ...emptySeo, title: "SoloCalculator | Quick calculators" }, { siteName: "SoloCalculator", titleTemplate: "%s | SoloCalculator", defaultDescription: "Default", defaultImageUrl: null }, "/");
+    expect(metadata.title).toBe("SoloCalculator | Quick calculators");
+  });
 });

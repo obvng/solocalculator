@@ -1,5 +1,6 @@
 import type { PageSeoRecord, PostRecord, RedirectRecord, SeoRecord, SiteSettings, TaxonomyRecord } from "./types";
 import { emptySeo, getDefaultPageSeo } from "@/lib/seo/defaults";
+import { tools } from "@/lib/tools/catalog";
 
 type DatabaseRow = Record<string, unknown>;
 
@@ -64,8 +65,9 @@ async function defaultDataSource(): Promise<ContentDataSource> {
         canonical: data.canonical_url, breadcrumbLabel: data.breadcrumb_label,
         noIndex: data.no_index, noFollow: data.no_follow, includeInSitemap: data.include_in_sitemap,
         sitemapPriority: Number(data.sitemap_priority), changeFrequency: data.change_frequency,
-        openGraph: data.open_graph, xCard: data.x_card, supportingKeywords: data.keywords,
-        schemaProperties: data.schema_config, faqItems: data.faq_items,
+        openGraph: data.open_graph, xCard: data.x_card,
+        targetKeyword: data.keywords?.[0] ?? "", supportingKeywords: data.keywords?.slice(1) ?? [],
+        schemaType: data.schema_config?.type, schemaProperties: data.schema_config?.properties ?? {}, faqItems: data.faq_items,
         relatedPageKeys: data.related_page_keys, relatedPostIds: data.related_post_ids,
         createdAt: data.created_at, updatedAt: data.updated_at,
       } as Partial<PageSeoRecord>;
@@ -138,11 +140,29 @@ export async function listPublicRedirects(): Promise<RedirectRecord[]> {
   } catch { return []; }
 }
 
+export async function listPublicPageSeo(): Promise<PageSeoRecord[]> {
+  const defaultKeys = ["home", ...tools.map((tool) => tool.slug)];
+  try {
+    const { createServerClient } = await import("@/lib/supabase/server");
+    const supabase = await createServerClient();
+    const { data } = await supabase.from("page_seo").select("page_key");
+    const keys = new Set([...defaultKeys, ...(data ?? []).map((row) => row.page_key)]);
+    return Promise.all([...keys].map((pageKey) => getPageSeo(pageKey)));
+  } catch { return defaultKeys.map(getDefaultPageSeo); }
+}
+
 export async function getPublicSettings(): Promise<SiteSettings | null> {
   try {
     const { createServerClient } = await import("@/lib/supabase/server");
     const supabase = await createServerClient();
     const { data } = await supabase.from("site_settings").select("*").eq("id", true).maybeSingle();
-    return data as unknown as SiteSettings | null;
+    if (!data) return null;
+    return {
+      siteName: data.site_name, titleTemplate: data.title_template,
+      defaultDescription: data.default_description, defaultSocialImageId: data.default_social_image_id,
+      organization: data.organization, socialProfiles: data.social_profiles,
+      verificationTokens: data.verification_tokens, robotsRules: data.robots_rules,
+      updatedAt: data.updated_at,
+    };
   } catch { return null; }
 }
