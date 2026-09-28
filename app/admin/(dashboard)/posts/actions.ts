@@ -23,6 +23,8 @@ export async function savePost(id: string, formData: FormData) {
   const slug = normalizeSlug(String(formData.get("slug") ?? title));
   const sourceHtml = String(formData.get("sourceHtml") ?? "");
   const sanitizedHtml = sanitizeArticleHtml(sourceHtml);
+  let seo: Record<string, unknown> = {};
+  try { seo = JSON.parse(String(formData.get("seoJson") ?? "{}")); } catch { redirect(`/admin/posts/${id}?error=seo`); }
   const status = intent === "publish" ? "published" : intent === "schedule" ? "scheduled" : "draft";
   const parsed = postInputSchema.safeParse({ title, slug, sanitizedHtml, status });
   if (!parsed.success) redirect(`/admin/posts/${id}?error=validation`);
@@ -33,6 +35,7 @@ export async function savePost(id: string, formData: FormData) {
   const publishedAt = status === "published" ? new Date().toISOString() : null;
   const { error } = await supabase.from("posts").update({
     title, slug, excerpt: String(formData.get("excerpt") ?? ""), source_html: sourceHtml, sanitized_html: sanitizedHtml,
+    editor_document: JSON.parse(String(formData.get("editorDocument") ?? '{"type":"doc","content":[]}')), seo,
     status, published_at: publishedAt, scheduled_at: status === "scheduled" ? String(formData.get("scheduledAt") ?? "") || null : null,
     version: current.version + 1,
   }).eq("id", id);

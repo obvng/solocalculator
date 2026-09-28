@@ -1,0 +1,2 @@
+import styles from "@/app/admin/(dashboard)/admin.module.css";
+export function SearchPreview({ title, description, slug }: { title: string; description: string; slug: string }) { return <section className={styles.searchPreview}><h3>Search preview</h3><small>www.solocalculator.com › blog › {slug}</small><strong>{title || "Article title"}</strong><p>{description || "Your meta description will appear here."}</p></section>; }
