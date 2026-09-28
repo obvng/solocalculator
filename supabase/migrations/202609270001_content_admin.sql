@@ -97,7 +97,7 @@ create table public.redirects (
   created_at timestamptz not null default now(), updated_at timestamptz not null default now(), constraint redirect_not_self check (source_path <> destination)
 );
 create table public.redirect_history (
-  id uuid primary key default gen_random_uuid(), redirect_id uuid not null references public.redirects(id) on delete cascade,
+  id uuid primary key default gen_random_uuid(), redirect_id uuid references public.redirects(id) on delete set null,
   previous_value jsonb not null, changed_at timestamptz not null default now()
 );
 create table public.site_settings (
