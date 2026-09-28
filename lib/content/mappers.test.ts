@@ -1,5 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { mapSiteSettings } from "./mappers";
+import { mapPageSeo, mapSiteSettings } from "./mappers";
+
+describe("mapPageSeo", () => {
+  it("fills required social fields when Neon stores empty JSON objects", () => {
+    const seo = mapPageSeo({
+      pageKey: "calculator",
+      pathname: "/calculator",
+      openGraph: {},
+      xCard: {},
+    });
+
+    expect(seo.openGraph).toEqual({ title: "", description: "", imageId: null });
+    expect(seo.xCard).toEqual({ title: "", description: "", imageId: null });
+  });
+});
 
 describe("mapSiteSettings", () => {
   it("maps AdSense settings from the database row", () => {
