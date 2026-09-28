@@ -204,6 +204,8 @@ export const siteSettings = pgTable("site_settings", {
   socialProfiles: text("social_profiles").array().notNull().default(sql`'{}'::text[]`),
   verificationTokens: jsonb("verification_tokens").notNull().default({}),
   robotsRules: jsonb("robots_rules").notNull().default({}),
+  googleAnalyticsMeasurementId: text("google_analytics_measurement_id").notNull().default(""),
+  googleAnalyticsEnabled: boolean("google_analytics_enabled").notNull().default(false),
   adsensePublisherId: text("adsense_publisher_id").notNull().default(""),
   adsenseCode: text("adsense_code").notNull().default(""),
   adsenseEnabled: boolean("adsense_enabled").notNull().default(false),

@@ -1,0 +1,2 @@
+ALTER TABLE "site_settings" ADD COLUMN "google_analytics_measurement_id" text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE "site_settings" ADD COLUMN "google_analytics_enabled" boolean DEFAULT false NOT NULL;

@@ -26,6 +26,8 @@ describe("mapSiteSettings", () => {
       socialProfiles: [],
       verificationTokens: {},
       robotsRules: {},
+      googleAnalyticsMeasurementId: "G-97MT050QEL",
+      googleAnalyticsEnabled: true,
       adsensePublisherId: "ca-pub-1234567890",
       adsenseCode: "official-code",
       adsenseEnabled: true,
@@ -33,6 +35,8 @@ describe("mapSiteSettings", () => {
       id: true,
     });
 
+    expect(settings.googleAnalyticsMeasurementId).toBe("G-97MT050QEL");
+    expect(settings.googleAnalyticsEnabled).toBe(true);
     expect(settings.adsensePublisherId).toBe("ca-pub-1234567890");
     expect(settings.adsenseEnabled).toBe(true);
     expect(settings.updatedAt).toBe("2026-09-28T12:00:00.000Z");

@@ -124,6 +124,8 @@ export interface SiteSettings {
   socialProfiles: string[];
   verificationTokens: Record<string, string>;
   robotsRules: Record<string, unknown>;
+  googleAnalyticsMeasurementId: string;
+  googleAnalyticsEnabled: boolean;
   adsensePublisherId: string;
   adsenseCode: string;
   adsenseEnabled: boolean;
