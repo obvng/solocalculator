@@ -66,5 +66,6 @@ export const siteSettingsInputSchema = z.object({
   siteName: z.string().trim().min(1).max(100), titleTemplate: z.string().includes("%s"),
   defaultDescription: z.string().max(320), socialProfiles: z.array(z.string().url()),
   verificationTokens: z.record(z.string(), z.string()), robotsRules: z.record(z.string(), z.unknown()),
+  googleAnalyticsMeasurementId: z.union([z.literal(""), z.string().regex(/^G-[A-Z0-9]+$/)]), googleAnalyticsEnabled: z.boolean(),
   adsensePublisherId: z.string().max(40), adsenseCode: z.string().max(1000), adsenseEnabled: z.boolean(),
 });

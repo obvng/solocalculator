@@ -10,6 +10,11 @@ export interface MetadataDefaults {
   defaultImageUrl: string | null;
 }
 
+export function toVerificationMetadata(tokens: Record<string, string>): Metadata["verification"] | undefined {
+  const google = tokens.google?.trim();
+  return google ? { google } : undefined;
+}
+
 export function absoluteUrl(value: string | undefined, fallbackPath = "/"): string {
   const candidate = value?.trim() || fallbackPath;
   try {

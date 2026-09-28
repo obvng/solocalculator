@@ -46,6 +46,7 @@ export function mapSiteSettings(row: DatabaseRow): SiteSettings {
   return {
     siteName: String(value(row, "siteName", "site_name") ?? "SoloCalculator"), titleTemplate: String(value(row, "titleTemplate", "title_template") ?? "%s | SoloCalculator"), defaultDescription: String(value(row, "defaultDescription", "default_description") ?? ""), defaultSocialImageId: value(row, "defaultSocialImageId", "default_social_image_id") ? String(value(row, "defaultSocialImageId", "default_social_image_id")) : null,
     organization: (row.organization as Record<string, unknown>) ?? {}, socialProfiles: (value(row, "socialProfiles", "social_profiles") as string[]) ?? [], verificationTokens: (value(row, "verificationTokens", "verification_tokens") as Record<string, string>) ?? {}, robotsRules: (value(row, "robotsRules", "robots_rules") as Record<string, unknown>) ?? {},
+    googleAnalyticsMeasurementId: String(value(row, "googleAnalyticsMeasurementId", "google_analytics_measurement_id") ?? ""), googleAnalyticsEnabled: Boolean(value(row, "googleAnalyticsEnabled", "google_analytics_enabled")),
     adsensePublisherId: String(value(row, "adsensePublisherId", "adsense_publisher_id") ?? ""), adsenseCode: String(value(row, "adsenseCode", "adsense_code") ?? ""), adsenseEnabled: Boolean(value(row, "adsenseEnabled", "adsense_enabled")), updatedAt: iso(value(row, "updatedAt", "updated_at")),
   };
 }
