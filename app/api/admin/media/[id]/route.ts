@@ -1,10 +1,55 @@
+import { eq, or, sql } from "drizzle-orm";
 import { imageSize } from "image-size";
 import { requireOwner } from "@/lib/auth/owner";
+import { mapMedia } from "@/lib/content/mappers";
 import { deleteMedia, validateUpload, type MediaReference } from "@/lib/content/media";
-import { createServerClient } from "@/lib/supabase/server";
+import { getDb } from "@/lib/db/client";
+import { media, pageSeo, posts, siteSettings } from "@/lib/db/schema";
+import { putMediaBlob, removeMediaBlob } from "@/lib/media/blob";
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) { await requireOwner(); const { id } = await params; const body = await request.json(); const supabase = await createServerClient(); const { data, error } = await supabase.from("media").update({ alt_text: String(body.altText ?? ""), caption: String(body.caption ?? "") }).eq("id", id).select("*").single(); return error ? Response.json({ error: "Media text could not be saved." }, { status: 500 }) : Response.json(data); }
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  await requireOwner(); const { id } = await params; const body = await request.json();
+  const [row] = await getDb().update(media).set({ altText: String(body.altText ?? ""), caption: String(body.caption ?? ""), updatedAt: new Date() }).where(eq(media.id, id)).returning();
+  return row ? Response.json(mapMedia(row)) : Response.json({ error: "Media not found." }, { status: 404 });
+}
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) { await requireOwner(); const { id } = await params; const form = await request.formData(); const file = form.get("file"); if (!(file instanceof File)) return Response.json({ error: "Choose a replacement image." }, { status: 400 }); const validation = validateUpload(file); if (!validation.ok) return Response.json({ error: validation.error }, { status: 400 }); const bytes = new Uint8Array(await file.arrayBuffer()); const dimensions = imageSize(bytes); if (!dimensions.width || !dimensions.height) return Response.json({ error: "The image dimensions could not be read." }, { status: 400 }); const supabase = await createServerClient(); const { data: current } = await supabase.from("media").select("storage_path").eq("id", id).single(); if (!current) return Response.json({ error: "Media not found." }, { status: 404 }); const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "image"; const path = `uploads/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extension}`; const upload = await supabase.storage.from("media").upload(path, bytes, { contentType: file.type }); if (upload.error) return Response.json({ error: "Replacement upload failed." }, { status: 500 }); const { data: publicData } = supabase.storage.from("media").getPublicUrl(path); const updated = await supabase.from("media").update({ storage_path: path, public_url: publicData.publicUrl, original_filename: file.name, mime_type: file.type, width: dimensions.width, height: dimensions.height, byte_size: file.size }).eq("id", id).select("*").single(); if (updated.error) { await supabase.storage.from("media").remove([path]); return Response.json({ error: "Replacement could not be saved." }, { status: 500 }); } await supabase.storage.from("media").remove([current.storage_path]); return Response.json(updated.data); }
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  await requireOwner(); const { id } = await params; const form = await request.formData(); const file = form.get("file");
+  if (!(file instanceof File)) return Response.json({ error: "Choose a replacement image." }, { status: 400 });
+  const validation = validateUpload(file); if (!validation.ok) return Response.json({ error: validation.error }, { status: 400 });
+  const bytes = new Uint8Array(await file.arrayBuffer()); const dimensions = imageSize(bytes);
+  if (!dimensions.width || !dimensions.height) return Response.json({ error: "The image dimensions could not be read." }, { status: 400 });
+  const [current] = await getDb().select().from(media).where(eq(media.id, id)).limit(1);
+  if (!current) return Response.json({ error: "Media not found." }, { status: 404 });
+  const uploaded = await putMediaBlob(file);
+  try {
+    const [row] = await getDb().update(media).set({ storagePath: uploaded.pathname, publicUrl: uploaded.url, originalFilename: file.name, mimeType: file.type, width: dimensions.width, height: dimensions.height, byteSize: file.size, updatedAt: new Date() }).where(eq(media.id, id)).returning();
+    await removeMediaBlob(current.storagePath).catch(() => undefined);
+    return Response.json(mapMedia(row));
+  } catch {
+    await removeMediaBlob(uploaded.pathname).catch(() => undefined);
+    return Response.json({ error: "Replacement could not be saved." }, { status: 500 });
+  }
+}
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) { await requireOwner(); const { id } = await params; const supabase = await createServerClient(); const { data: media } = await supabase.from("media").select("storage_path").eq("id", id).single(); if (!media) return Response.json({ error: "Media not found." }, { status: 404 }); const result = await deleteMedia(id, media.storage_path, { findReferences: async (mediaId) => { const references: MediaReference[] = []; const [posts, pages, settings] = await Promise.all([supabase.from("posts").select("id,title").or(`featured_image_id.eq.${mediaId},social_image_id.eq.${mediaId}`), supabase.from("page_seo").select("id,page_key").or(`open_graph->>imageId.eq.${mediaId},x_card->>imageId.eq.${mediaId}`), supabase.from("site_settings").select("id").eq("default_social_image_id", mediaId)]); (posts.data ?? []).forEach((post) => references.push({ type: "post", id: post.id, label: post.title })); (pages.data ?? []).forEach((page) => references.push({ type: "page", id: page.id, label: page.page_key })); (settings.data ?? []).forEach(() => references.push({ type: "settings", id: "site", label: "Site settings" })); return references; }, deleteRecord: async (mediaId) => { const { error } = await supabase.from("media").delete().eq("id", mediaId); if (error) throw error; }, deleteObject: async (path) => { const { error } = await supabase.storage.from("media").remove([path]); if (error) throw error; } }); return result.ok ? Response.json(result) : Response.json(result, { status: 409 }); }
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  await requireOwner(); const { id } = await params; const [item] = await getDb().select().from(media).where(eq(media.id, id)).limit(1);
+  if (!item) return Response.json({ error: "Media not found." }, { status: 404 });
+  const result = await deleteMedia(id, item.storagePath, {
+    findReferences: async (mediaId) => {
+      const references: MediaReference[] = [];
+      const [postRows, pageRows, settingRows] = await Promise.all([
+        getDb().select({ id: posts.id, title: posts.title }).from(posts).where(or(eq(posts.featuredImageId, mediaId), eq(posts.socialImageId, mediaId))),
+        getDb().select({ id: pageSeo.id, pageKey: pageSeo.pageKey }).from(pageSeo).where(or(sql`${pageSeo.openGraph}::text like ${`%${mediaId}%`}`, sql`${pageSeo.xCard}::text like ${`%${mediaId}%`}`)),
+        getDb().select({ id: siteSettings.id }).from(siteSettings).where(eq(siteSettings.defaultSocialImageId, mediaId)),
+      ]);
+      postRows.forEach((post) => references.push({ type: "post", id: post.id, label: post.title }));
+      pageRows.forEach((page) => references.push({ type: "page", id: page.id, label: page.pageKey }));
+      settingRows.forEach(() => references.push({ type: "settings", id: "site", label: "Site settings" }));
+      return references;
+    },
+    deleteRecord: async (mediaId) => { await getDb().delete(media).where(eq(media.id, mediaId)); },
+    deleteObject: removeMediaBlob,
+  });
+  return result.ok ? Response.json(result) : Response.json(result, { status: 409 });
+}

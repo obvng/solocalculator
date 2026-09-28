@@ -3,17 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOwner } from "@/lib/auth/owner";
+import { createAdminRedirect, createDraftPost, getAdminPost, publishPost, saveAdminPost, saveTaxonomy as saveTaxonomyRecord } from "@/lib/admin/repository";
 import { sanitizeArticleHtml } from "@/lib/content/sanitize";
 import { normalizeSlug, postInputSchema, taxonomyInputSchema } from "@/lib/content/validation";
-import { createServerClient } from "@/lib/supabase/server";
 
 export async function createPost() {
   await requireOwner();
-  const supabase = await createServerClient();
-  const slug = `untitled-${Date.now()}`;
-  const { data, error } = await supabase.from("posts").insert({ title: "Untitled article", slug, status: "draft" }).select("id").single();
-  if (error) redirect("/admin/posts?error=create");
-  redirect(`/admin/posts/${data.id}`);
+  try { redirect(`/admin/posts/${await createDraftPost()}`); } catch (error) { if ((error as { digest?: string }).digest?.startsWith("NEXT_REDIRECT")) throw error; redirect("/admin/posts?error=create"); }
 }
 
 export async function savePost(id: string, formData: FormData) {
@@ -29,23 +25,21 @@ export async function savePost(id: string, formData: FormData) {
   const parsed = postInputSchema.safeParse({ title, slug, sanitizedHtml, status });
   if (!parsed.success) redirect(`/admin/posts/${id}?error=validation`);
 
-  const supabase = await createServerClient();
-  const { data: current } = await supabase.from("posts").select("slug,status,version").eq("id", id).single();
+  const current = await getAdminPost(id);
   if (!current) redirect("/admin/posts?error=missing");
-  const publishedAt = status === "published" ? new Date().toISOString() : null;
-  const { error } = await supabase.from("posts").update({
-    title, slug, excerpt: String(formData.get("excerpt") ?? ""), source_html: sourceHtml, sanitized_html: sanitizedHtml,
-    editor_document: JSON.parse(String(formData.get("editorDocument") ?? '{"type":"doc","content":[]}')), seo,
-    status, published_at: publishedAt, scheduled_at: status === "scheduled" ? String(formData.get("scheduledAt") ?? "") || null : null,
+  const publishedAt = status === "published" ? new Date() : null;
+  const saved = await saveAdminPost(id, {
+    title, slug, excerpt: String(formData.get("excerpt") ?? ""), sourceHtml, sanitizedHtml,
+    editorDocument: JSON.parse(String(formData.get("editorDocument") ?? '{"type":"doc","content":[]}')), seo,
+    status, publishedAt, scheduledAt: status === "scheduled" ? new Date(String(formData.get("scheduledAt") ?? "")) : null,
     version: current.version + 1,
-  }).eq("id", id);
-  if (error) redirect(`/admin/posts/${id}?error=save`);
+  });
+  if (!saved) redirect(`/admin/posts/${id}?error=save`);
 
   if (status === "published") {
-    const { error: publishError } = await supabase.rpc("publish_post", { p_post_id: id });
-    if (publishError) redirect(`/admin/posts/${id}?error=publish`);
+    try { await publishPost(id); } catch { redirect(`/admin/posts/${id}?error=publish`); }
     if (current.status === "published" && current.slug !== slug && formData.get("createRedirect") === "on") {
-      await supabase.from("redirects").insert({ source_path: `/blog/${current.slug}`, destination: `/blog/${slug}`, status_code: 308, enabled: true });
+      await createAdminRedirect({ sourcePath: `/blog/${current.slug}`, destination: `/blog/${slug}`, statusCode: 308, enabled: true });
     }
   }
   revalidatePath("/blog"); revalidatePath(`/blog/${slug}`); revalidatePath("/sitemap.xml"); revalidatePath("/feed.xml");
@@ -57,8 +51,6 @@ export async function saveTaxonomy(kind: "category" | "tag", formData: FormData)
   const input = { name: String(formData.get("name") ?? ""), slug: normalizeSlug(String(formData.get("slug") ?? formData.get("name") ?? "")), description: String(formData.get("description") ?? ""), seo: {} };
   const parsed = taxonomyInputSchema.safeParse(input);
   if (!parsed.success) redirect("/admin/taxonomies?error=validation");
-  const supabase = await createServerClient();
-  const { error } = await supabase.from(kind === "category" ? "categories" : "tags").insert({ name: input.name, slug: input.slug, description: input.description });
-  if (error) redirect("/admin/taxonomies?error=save");
+  try { await saveTaxonomyRecord(kind, input); } catch { redirect("/admin/taxonomies?error=save"); }
   revalidatePath("/admin/taxonomies");
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getPageSeo, mapPublishedPost } from "./repository";
+import { getPageSeo, listPublishedPosts, mapPublishedPost } from "./repository";
 
 describe("getPageSeo", () => {
   it("uses code defaults when the database read fails", async () => {
@@ -29,5 +29,18 @@ describe("mapPublishedPost", () => {
     }));
     expect(post.seo.openGraph.title).toBe("Social title");
     expect(post.seo.openGraph.description).toBe("");
+  });
+});
+
+describe("listPublishedPosts", () => {
+  it("returns only current revisions whose publication time has passed", async () => {
+    const rows = [
+      { post_id: "old", title: "Old", slug: "old", sanitized_html: "<p>Old</p>", is_current: false, published_at: "2026-09-27T10:00:00.000Z" },
+      { post_id: "future", title: "Future", slug: "future", sanitized_html: "<p>Future</p>", is_current: true, published_at: "2026-10-01T10:00:00.000Z" },
+      { post_id: "current", title: "Current", slug: "current", sanitized_html: "<p>Current</p>", is_current: true, published_at: "2026-09-28T10:00:00.000Z" },
+    ];
+    const posts = await listPublishedPosts({ listPublishedPostRows: async () => rows }, new Date("2026-09-28T12:00:00.000Z"));
+
+    expect(posts.map((post) => post.title)).toEqual(["Current"]);
   });
 });

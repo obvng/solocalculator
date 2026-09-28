@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { AdSenseScript } from "@/components/AdSenseScript";
+import { getPublicSettings } from "@/lib/content/repository";
 import "@fontsource-variable/nunito-sans";
 import "./globals.css";
 
@@ -8,10 +10,11 @@ export const metadata: Metadata = {
   description: "Free, easy-to-use calculators for everyday maths, dates, loans, conversions and more.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const settings = await getPublicSettings();
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>{children}<AdSenseScript publisherId={settings?.adsensePublisherId ?? ""} enabled={settings?.adsenseEnabled ?? false} /></body>
     </html>
   );
 }
