@@ -15,18 +15,14 @@ export interface OwnerIdentity {
 }
 
 export async function requireOwner(): Promise<OwnerIdentity> {
-  const [{ redirect }, { createServerClient }] = await Promise.all([
+  const [{ redirect }, { getOwnerSession }] = await Promise.all([
     import("next/navigation"),
-    import("@/lib/supabase/server"),
+    import("./session"),
   ]);
-  const supabase = await createServerClient();
-  const { data, error } = await supabase.auth.getClaims();
-  const email = typeof data?.claims?.email === "string" ? data.claims.email : null;
-  const id = typeof data?.claims?.sub === "string" ? data.claims.sub : null;
-
-  if (error || !id || !email || !isAllowedOwner(email)) {
+  const owner = await getOwnerSession();
+  if (!owner || !isAllowedOwner(owner.email)) {
     redirect("/admin/login");
     throw new Error("Redirect failed");
   }
-  return { id, email };
+  return owner;
 }
