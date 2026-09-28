@@ -1,22 +1,9 @@
 import Link from "next/link";
-import { createServerClient } from "@/lib/supabase/server";
+import { getOverview } from "@/lib/admin/repository";
 import styles from "./admin.module.css";
 
-async function getOverview() {
-  try {
-    const supabase = await createServerClient();
-    const [posts, scheduled, audits] = await Promise.all([
-      supabase.from("posts").select("id", { count: "exact", head: true }),
-      supabase.from("posts").select("id", { count: "exact", head: true }).eq("status", "scheduled"),
-      supabase.from("seo_audit_results").select("issues").limit(50),
-    ]);
-    const issues = (audits.data ?? []).flatMap((row) => Array.isArray(row.issues) ? row.issues : []);
-    return { posts: posts.count ?? 0, scheduled: scheduled.count ?? 0, issues: issues.length };
-  } catch { return { posts: 0, scheduled: 0, issues: 0 }; }
-}
-
 export default async function AdminOverview() {
-  const overview = await getOverview();
+  const overview = await getOverview().catch(() => ({ posts: 0, scheduled: 0, issues: 0 }));
   return <>
     <header className={styles.pageHeader}><div><p>Sunday, 27 September</p><h1>Everything that needs your attention.</h1></div><Link href="/admin/posts/new">Write a post</Link></header>
     <section className={styles.metrics} aria-label="Content summary">
