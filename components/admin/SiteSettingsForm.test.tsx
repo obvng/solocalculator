@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { expect, it, vi } from "vitest";
 import { SiteSettingsForm } from "./SiteSettingsForm";
 
 vi.mock("@/app/admin/(dashboard)/actions", () => ({ saveSiteSettings: vi.fn() }));

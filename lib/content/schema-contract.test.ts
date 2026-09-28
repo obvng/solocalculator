@@ -2,13 +2,14 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const sql = readFileSync(
-  "supabase/migrations/202609270001_content_admin.sql",
+  "drizzle/0000_calm_sentry.sql",
   "utf8",
 );
 
 describe("content schema", () => {
   it.each([
-    "profiles",
+    "owners",
+    "sessions",
     "posts",
     "post_revisions",
     "page_seo",
@@ -22,27 +23,27 @@ describe("content schema", () => {
     "site_settings",
     "seo_audit_results",
   ])("creates the %s table", (table) => {
-    expect(sql).toMatch(new RegExp(`create table public\\.${table}`));
+    expect(sql).toContain(`CREATE TABLE "${table}"`);
   });
 
-  it("protects owner mutations at the database boundary", () => {
-    expect(sql).toContain("create or replace function public.is_owner()");
-    expect(sql).toContain("using ((select public.is_owner()))");
-    expect(sql).toContain("with check ((select public.is_owner()))");
+  it("stores only hashed owner passwords and session tokens", () => {
+    expect(sql).toContain('"password_hash" text NOT NULL');
+    expect(sql).toContain('"token_hash" text NOT NULL');
+    expect(sql).not.toContain('"password" text');
   });
 
-  it("limits public post reads to published rows", () => {
-    expect(sql).toContain("status = 'published'");
-    expect(sql).toContain("published_at <= now()");
+  it("keeps one immutable current revision per post", () => {
+    expect(sql).toContain('CREATE UNIQUE INDEX "post_revisions_current_unique"');
+    expect(sql).toContain('WHERE "post_revisions"."is_current"');
   });
 
-  it("grants Data API access explicitly", () => {
-    expect(sql).toContain("grant select on public.posts to anon, authenticated");
-    expect(sql).toContain("grant insert, update, delete on public.posts to authenticated");
+  it("removes sessions when their owner is removed", () => {
+    expect(sql).toContain('FOREIGN KEY ("owner_id") REFERENCES "public"."owners"("id") ON DELETE cascade');
   });
 
-  it("allows public media reads and owner-only writes", () => {
-    expect(sql).toContain("values ('media', 'media', true");
-    expect(sql).toContain("bucket_id = 'media' and (select public.is_owner())");
+  it("seeds editable SEO pages and singleton site settings", () => {
+    expect(sql).toContain('INSERT INTO "page_seo"');
+    expect(sql).toContain("('home', '/', 1.0, 'weekly')");
+    expect(sql).toContain('INSERT INTO "site_settings" ("id") VALUES (true)');
   });
 });

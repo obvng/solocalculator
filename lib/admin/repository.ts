@@ -1,7 +1,7 @@
-import { and, asc, count, desc, eq, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { categories, media, pageSeo, postRevisions, posts, redirectHistory, redirects, seoAuditResults, siteSettings, tags } from "@/lib/db/schema";
-import { mapPageSeo, mapRedirect, mapSeo, mapSiteSettings } from "@/lib/content/mappers";
+import { mapRedirect, mapSeo, mapSiteSettings } from "@/lib/content/mappers";
 import type { PostRecord, RedirectRecord, SiteSettings } from "@/lib/content/types";
 
 type PublishablePost = Pick<typeof posts.$inferSelect, "id" | "title" | "slug" | "excerpt" | "sanitizedHtml" | "authorDisplayName" | "featuredImageId" | "socialImageId" | "seo" | "relatedPageKeys" | "relatedPostIds" | "publishedAt">;

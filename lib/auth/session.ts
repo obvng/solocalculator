@@ -4,8 +4,8 @@ import { cookies } from "next/headers";
 import { getDb } from "@/lib/db/client";
 import { owners, sessions } from "@/lib/db/schema";
 import type { OwnerIdentity } from "./owner";
+import { OWNER_COOKIE_NAME } from "./constants";
 
-const COOKIE_NAME = "solocalculator_admin";
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function hashSessionToken(token: string) {
@@ -21,7 +21,7 @@ export async function createOwnerSession(ownerId: string) {
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
   await getDb().insert(sessions).values({ ownerId, tokenHash: hashSessionToken(token), expiresAt });
   const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, token, {
+  cookieStore.set(OWNER_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -32,7 +32,7 @@ export async function createOwnerSession(ownerId: string) {
 
 export async function getOwnerSession(): Promise<OwnerIdentity | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
+  const token = cookieStore.get(OWNER_COOKIE_NAME)?.value;
   if (!token) return null;
   const [record] = await getDb()
     .select({ id: owners.id, email: owners.email })
@@ -45,7 +45,7 @@ export async function getOwnerSession(): Promise<OwnerIdentity | null> {
 
 export async function deleteOwnerSession() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
+  const token = cookieStore.get(OWNER_COOKIE_NAME)?.value;
   if (token) await getDb().delete(sessions).where(eq(sessions.tokenHash, hashSessionToken(token)));
-  cookieStore.set(COOKIE_NAME, "", { httpOnly: true, expires: new Date(0), path: "/", sameSite: "lax" });
+  cookieStore.set(OWNER_COOKIE_NAME, "", { httpOnly: true, expires: new Date(0), path: "/", sameSite: "lax" });
 }
