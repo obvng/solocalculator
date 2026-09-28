@@ -12,8 +12,13 @@ import {
   TeaBag,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Calculator } from "@/components/calculator/Calculator";
 import { Header } from "@/components/Header";
+import { ArticleBody } from "@/components/content/ArticleBody";
+import { getPageSeo, getPublicSettings } from "@/lib/content/repository";
+import { sanitizeArticleHtml } from "@/lib/content/sanitize";
+import { toNextMetadata } from "@/lib/seo/metadata";
 import styles from "./page.module.css";
 
 const popularTools = [
@@ -31,7 +36,13 @@ const benefits = [
   { icon: ChartBar, text: <>Small tools.<br />Big possibilities.</>, color: "blue" },
 ];
 
-export default function Home() {
+export async function generateMetadata(): Promise<Metadata> {
+  const [seo, settings] = await Promise.all([getPageSeo("home"), getPublicSettings()]);
+  return toNextMetadata(seo, { siteName: settings?.siteName ?? "SoloCalculator", titleTemplate: settings?.titleTemplate ?? "%s | SoloCalculator", defaultDescription: settings?.defaultDescription ?? seo.description, defaultImageUrl: null }, "/");
+}
+
+export default async function Home() {
+  const page = await getPageSeo("home");
   return (
     <main className={styles.viewport}>
       <div className={styles.pageShell}>
@@ -93,6 +104,7 @@ export default function Home() {
             </Link>
           </div>
         </section>
+        {page.introductionHtml && <section className={styles.seoContent}><ArticleBody html={sanitizeArticleHtml(page.introductionHtml)} /></section>}
       </div>
     </main>
   );

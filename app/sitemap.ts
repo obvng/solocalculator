@@ -1,10 +1,13 @@
 import type { MetadataRoute } from "next";
-import { tools } from "@/lib/tools/catalog";
+import { listPublicPageSeo, listPublishedPosts } from "@/lib/content/repository";
+import { PRODUCTION_ORIGIN } from "@/lib/seo/metadata";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://solocalculator.com";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [pages, posts] = await Promise.all([listPublicPageSeo(), listPublishedPosts()]);
+  const visiblePages = pages.filter((page) => page.includeInSitemap && !page.noIndex);
   return [
-    { url: base, changeFrequency: "weekly", priority: 1 },
-    ...tools.map(({ slug }) => ({ url: `${base}/${slug}`, changeFrequency: "monthly" as const, priority: .8 })),
+    ...visiblePages.map((page) => ({ url: `${PRODUCTION_ORIGIN}${page.pathname === "/" ? "" : page.pathname}`, lastModified: page.updatedAt || undefined, changeFrequency: page.changeFrequency, priority: page.sitemapPriority })),
+    { url: `${PRODUCTION_ORIGIN}/blog`, changeFrequency: "weekly", priority: .7 },
+    ...posts.filter((post) => post.seo.includeInSitemap && !post.seo.noIndex).map((post) => ({ url: `${PRODUCTION_ORIGIN}/blog/${post.slug}`, lastModified: post.updatedAt || post.publishedAt || undefined, changeFrequency: post.seo.changeFrequency, priority: post.seo.sitemapPriority })),
   ];
 }

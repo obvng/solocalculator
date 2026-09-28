@@ -1,0 +1,2 @@
+import { signOut } from "@/app/admin/(dashboard)/actions"; import { requireOwner } from "@/lib/auth/owner"; import styles from "../admin.module.css";
+export default async function AccountPage() { const owner = await requireOwner(); return <><header className={styles.sectionHeader}><div><h1>Account</h1><p>The only account allowed to use this dashboard.</p></div></header><section className={styles.accountCard}><span>Signed in as</span><strong>{owner.email}</strong><form action={signOut}><button>Sign out</button></form></section></>; }
