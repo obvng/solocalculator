@@ -1,5 +1,5 @@
 import { emptySeo } from "@/lib/seo/defaults";
-import type { PageSeoRecord, PostRecord, RedirectRecord, SeoRecord, SiteSettings, TaxonomyRecord } from "./types";
+import type { MediaRecord, PageSeoRecord, PostRecord, RedirectRecord, SeoRecord, SiteSettings, TaxonomyRecord } from "./types";
 
 export type DatabaseRow = Record<string, unknown>;
 const value = (row: DatabaseRow, camel: string, snake: string) => row[camel] ?? row[snake];
@@ -40,6 +40,7 @@ export function mapPageSeo(row: DatabaseRow): Partial<PageSeoRecord> {
 
 export function mapTaxonomy(row: DatabaseRow, kind: "category" | "tag"): TaxonomyRecord { const slug = String(row.slug ?? ""); return { id: String(row.id), kind, name: String(row.name), slug, description: String(row.description ?? ""), seo: mapSeo(row.seo, slug), createdAt: iso(value(row, "createdAt", "created_at")), updatedAt: iso(value(row, "updatedAt", "updated_at")) }; }
 export function mapRedirect(row: DatabaseRow): RedirectRecord { return { id: String(row.id), sourcePath: String(value(row, "sourcePath", "source_path")), destination: String(row.destination), statusCode: Number(value(row, "statusCode", "status_code")) as RedirectRecord["statusCode"], enabled: Boolean(row.enabled), createdAt: iso(value(row, "createdAt", "created_at")), updatedAt: iso(value(row, "updatedAt", "updated_at")) }; }
+export function mapMedia(row: DatabaseRow): MediaRecord { return { id: String(row.id), storagePath: String(value(row, "storagePath", "storage_path")), publicUrl: String(value(row, "publicUrl", "public_url")), originalFilename: String(value(row, "originalFilename", "original_filename")), mimeType: String(value(row, "mimeType", "mime_type")) as MediaRecord["mimeType"], width: Number(row.width), height: Number(row.height), byteSize: Number(value(row, "byteSize", "byte_size")), altText: String(value(row, "altText", "alt_text") ?? ""), caption: String(row.caption ?? ""), createdAt: iso(value(row, "createdAt", "created_at")), updatedAt: iso(value(row, "updatedAt", "updated_at")) }; }
 
 export function mapSiteSettings(row: DatabaseRow): SiteSettings {
   return {

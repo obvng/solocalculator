@@ -32,6 +32,7 @@
     "@tiptap/extension-underline": "3.31.3",
     "@tiptap/react": "3.31.3",
     "@tiptap/starter-kit": "3.31.3",
+    "@vercel/blob": "^2.0.0",
     "drizzle-orm": "^0.44.5",
     "image-size": "2.0.4",
     "next": "^16.3.6",
