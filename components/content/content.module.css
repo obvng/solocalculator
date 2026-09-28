@@ -1,0 +1,20 @@
+.articleBody { color: #263766; font-size: 1.08rem; line-height: 1.85; }
+.articleBody h2, .articleBody h3 { color: var(--navy); line-height: 1.25; margin: 2.1rem 0 .75rem; }
+.articleBody h2 { font-size: 1.65rem; }
+.articleBody h3 { font-size: 1.3rem; }
+.articleBody p, .articleBody ul, .articleBody ol { margin: 0 0 1.1rem; }
+.articleBody a { color: var(--blue); font-weight: 750; }
+.articleBody img { border-radius: 22px; display: block; height: auto; margin: 1.5rem auto; max-width: 100%; }
+.articleBody blockquote { border-left: 4px solid #8ac7ff; margin: 1.5rem 0; padding: .4rem 0 .4rem 1.2rem; }
+.articleBody table { border-collapse: collapse; display: block; margin: 1.5rem 0; max-width: 100%; overflow-x: auto; }
+.articleBody th, .articleBody td { border: 1px solid #dbe8f5; padding: .65rem .8rem; text-align: left; }
+.articleBody iframe { border: 0; border-radius: 18px; max-width: 100%; }
+.postGrid { display: grid; gap: 1.15rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.postCard { background: #fff; border: 1px solid #dceafb; border-radius: 22px; box-shadow: 0 12px 30px rgba(42, 91, 150, .08); padding: 1.5rem; }
+.postCard time { color: #62739c; font-size: .85rem; font-weight: 700; }
+.postCard h2 { font-size: 1.35rem; line-height: 1.25; margin: .45rem 0 .65rem; }
+.postCard h2 a { text-decoration: none; }
+.postCard p { color: #53638a; line-height: 1.6; margin: 0 0 1rem; }
+.readLink { color: var(--blue); font-weight: 800; text-decoration: none; }
+.empty { background: #fff; border: 1px solid #dceafb; border-radius: 18px; color: #62739c; padding: 1.25rem; }
+@media (max-width: 680px) { .postGrid { grid-template-columns: 1fr; } .articleBody { font-size: 1rem; } }

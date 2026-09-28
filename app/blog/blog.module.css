@@ -1,0 +1,13 @@
+.viewport { min-height: 100vh; padding: 30px 36px 54px; }
+.shell { background: rgba(250, 253, 255, .94); border-radius: 26px; box-shadow: 0 28px 70px rgba(41, 81, 132, .14); margin: 0 auto; max-width: 1330px; overflow: hidden; }
+.content { margin: 0 auto; max-width: 980px; padding: 68px 42px 84px; }
+.hero { margin-bottom: 2rem; max-width: 760px; }
+.eyebrow { color: var(--blue); font-size: .8rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.hero h1, .articleHeader h1 { font-size: clamp(2.25rem, 5vw, 4rem); letter-spacing: -.045em; line-height: 1.02; margin: .55rem 0 1rem; }
+.hero p, .articleHeader p { color: #52638b; font-size: 1.12rem; line-height: 1.65; margin: 0; }
+.article { margin: 0 auto; max-width: 780px; }
+.breadcrumbs { align-items: center; color: #62739c; display: flex; flex-wrap: wrap; font-size: .9rem; gap: .5rem; margin-bottom: 1.4rem; }
+.breadcrumbs a { color: var(--blue); font-weight: 750; text-decoration: none; }
+.articleHeader { border-bottom: 1px solid #dce8f5; margin-bottom: 2rem; padding-bottom: 1.6rem; }
+.articleMeta { color: #62739c; display: flex; flex-wrap: wrap; font-size: .9rem; font-weight: 700; gap: .65rem; margin-top: 1rem; }
+@media (max-width: 700px) { .viewport { padding: 0; } .shell { border-radius: 0; } .content { padding: 44px 20px 64px; } }

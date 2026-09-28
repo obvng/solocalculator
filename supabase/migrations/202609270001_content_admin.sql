@@ -146,8 +146,8 @@ create policy "public reads published posts" on public.post_revisions for select
 create policy "public reads page seo" on public.page_seo for select to anon, authenticated using (true);
 create policy "public reads categories" on public.categories for select to anon, authenticated using (true);
 create policy "public reads tags" on public.tags for select to anon, authenticated using (true);
-create policy "public reads post categories" on public.post_categories for select to anon, authenticated using (exists (select 1 from public.posts where posts.id = post_id and status = 'published' and published_at <= now()));
-create policy "public reads post tags" on public.post_tags for select to anon, authenticated using (exists (select 1 from public.posts where posts.id = post_id and status = 'published' and published_at <= now()));
+create policy "public reads post categories" on public.post_categories for select to anon, authenticated using (exists (select 1 from public.post_revisions where post_revisions.post_id = post_categories.post_id and is_current and published_at <= now()));
+create policy "public reads post tags" on public.post_tags for select to anon, authenticated using (exists (select 1 from public.post_revisions where post_revisions.post_id = post_tags.post_id and is_current and published_at <= now()));
 create policy "public reads enabled redirects" on public.redirects for select to anon, authenticated using (enabled);
 create policy "public reads site settings" on public.site_settings for select to anon, authenticated using (true);
 
