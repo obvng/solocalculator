@@ -27,7 +27,7 @@ describe("recordSecurityEvent", () => {
     await expect(recordSecurityEvent({
       ownerId: null,
       eventType: "password=secret" as never,
-      reasonCode: "DATABASE_URL=value" as never,
+      reasonCode: "arbitrary-reason" as never,
       ipHash: "a".repeat(64),
     }, { insert: vi.fn() })).rejects.toThrow("Invalid security event");
   });

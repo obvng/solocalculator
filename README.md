@@ -4,7 +4,7 @@ SoloCalculator is a responsive calculator website built with Next.js and TypeScr
 
 ## Requirements
 
-- Node.js 22 or newer
+- Node.js 22.12 or newer
 - A Neon Postgres project for the private dashboard and blog
 - A Vercel Blob store for admin media uploads
 - A Vercel project for deployment
