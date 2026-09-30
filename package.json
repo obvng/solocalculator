@@ -15,7 +15,9 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "owner:bootstrap": "tsx scripts/bootstrap-owner.ts"
+    "owner:bootstrap": "tsx scripts/bootstrap-owner.ts",
+    "media:inventory": "tsx scripts/rebuild-media.ts",
+    "media:rebuild": "tsx scripts/rebuild-media.ts --apply"
   },
   "dependencies": {
     "@fontsource-variable/nunito-sans": "^5.3.0",

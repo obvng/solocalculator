@@ -59,3 +59,18 @@ Owner browser tests also need `E2E_OWNER_EMAIL` and `E2E_OWNER_PASSWORD`. Withou
 Before production merge, test anonymous, invalid-session and owner requests. Public routes must read current published revisions but not drafts. Only the owner may change posts, pages, media, redirects and settings.
 
 Currency conversion uses the free [Frankfurter](https://frankfurter.dev/) v2 API through the server route at `/api/rate`.
+
+## Rebuilding legacy media
+
+Media uploaded before processing version 1 must be inventoried and rebuilt. Use an isolated Preview deployment, Neon branch, and Blob store first.
+
+1. Apply the database migration to the preview Neon branch.
+2. Deploy the security branch to Vercel Preview with preview-scoped database and Blob variables.
+3. Run `npm run media:inventory`. This is a dry run and does not change rows or Blob objects.
+4. Inspect every `rejected` and `failed` entry in the JSON report.
+5. Back up Neon and confirm that the preview Blob store can be restored.
+6. Run `MEDIA_REBUILD_CONFIRM=solocalculator-media-v1 npm run media:rebuild` once.
+7. Check each updated row for `processing_version = 1`, a lowercase SHA-256 value, the detected MIME type, and a new UUID Blob path. Inspect the Blob `Content-Type` and confirm public pages still display the image.
+8. Review rejected legacy objects manually. The script never deletes them during the first run.
+
+Repeat the sequence against production only after preview evidence has been reviewed and production migration has been approved.
