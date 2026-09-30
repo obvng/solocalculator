@@ -1,4 +1,5 @@
 import { del, put } from "@vercel/blob";
+import { blobToken } from "@/lib/config/runtime-secrets";
 import type { SanitizedImage, SanitizedImageExtension } from "./image-security";
 
 const safeExtensions = new Set<SanitizedImageExtension>(["jpg", "png", "webp"]);
@@ -14,10 +15,11 @@ export async function putMediaBlob(image: SanitizedImage) {
     access: "public",
     addRandomSuffix: false,
     contentType: image.mimeType,
+    token: blobToken(),
   });
   return { pathname: blob.pathname, url: blob.url };
 }
 
 export async function removeMediaBlob(pathname: string) {
-  await del(pathname);
+  await del(pathname, { token: blobToken() });
 }
