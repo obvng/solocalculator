@@ -113,3 +113,18 @@ If a secret appears in a response, log, screenshot, repository, build artifact, 
 6. Inventory stored media again. Quarantine suspicious legacy objects without deleting evidence needed for review.
 
 No internet service can be guaranteed impossible to hack. A release is ready only when its tests, build, Preview attack checks, storage inspection, and configuration review all pass.
+
+## Local verification record: 2026-09-30
+
+Commit branch: `codex/media-upload-security`.
+
+- Node 22.23.3: 36 test files and 167 tests passed.
+- ESLint completed with no reported errors.
+- TypeScript completed with no errors using `--noEmit --incremental false`.
+- Next.js 16.3.7 production build completed and generated 31 static pages.
+- `npm audit --omit=dev` reported zero vulnerabilities.
+- Drizzle migration metadata check passed.
+- The unsafe-pattern scan found only three deliberate negative-test fixtures containing `image/gif`; application upload code had no match.
+- Local production response inspection confirmed one CSP per route, `nosniff` on public/admin/API responses, and no-store/noindex/frame blocking on admin responses.
+
+Preview deployment, Preview database migration, authenticated attack uploads, Blob inspection, and legacy inventory have not been run from this record. Production migration and merge remain blocked until those checks are completed.
