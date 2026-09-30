@@ -1,13 +1,20 @@
 import { del, put } from "@vercel/blob";
+import type { SanitizedImage, SanitizedImageExtension } from "./image-security";
 
-export function makeBlobPath(filename: string, id = crypto.randomUUID(), now = new Date()) {
-  const extension = filename.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "image";
+const safeExtensions = new Set<SanitizedImageExtension>(["jpg", "png", "webp"]);
+
+export function makeBlobPath(extension: SanitizedImageExtension, id = crypto.randomUUID(), now = new Date()) {
+  if (!safeExtensions.has(extension)) throw new Error("Unsupported sanitized extension");
   return `media/${now.toISOString().slice(0, 10)}/${id}.${extension}`;
 }
 
-export async function putMediaBlob(file: File) {
-  const pathname = makeBlobPath(file.name);
-  const blob = await put(pathname, file, { access: "public", addRandomSuffix: false, contentType: file.type });
+export async function putMediaBlob(image: SanitizedImage) {
+  const pathname = makeBlobPath(image.extension);
+  const blob = await put(pathname, image.bytes, {
+    access: "public",
+    addRandomSuffix: false,
+    contentType: image.mimeType,
+  });
   return { pathname: blob.pathname, url: blob.url };
 }
 
