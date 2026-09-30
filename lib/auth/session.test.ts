@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hashSessionToken, isSessionExpired } from "./session";
+import { hashSessionToken, isSessionExpired, ownerCookieOptions } from "./session";
 
 describe("owner sessions", () => {
   it("hashes a session token without returning the token", () => {
@@ -15,5 +15,17 @@ describe("owner sessions", () => {
 
     expect(isSessionExpired(expiry, new Date("2026-09-28T11:59:59.000Z"))).toBe(false);
     expect(isSessionExpired(expiry, new Date("2026-09-28T12:00:00.000Z"))).toBe(true);
+  });
+
+  it("uses a strict, HttpOnly owner cookie", () => {
+    const expires = new Date("2026-10-07T12:00:00.000Z");
+    expect(ownerCookieOptions(expires, "production")).toEqual({
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      path: "/",
+      expires,
+    });
+    expect(ownerCookieOptions(expires, "development")).toMatchObject({ secure: false, sameSite: "strict" });
   });
 });

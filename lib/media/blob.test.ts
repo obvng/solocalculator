@@ -43,8 +43,9 @@ describe("verified media blob storage", () => {
     });
     expect(putMock).toHaveBeenCalledWith(
       expect.stringMatching(/^media\/\d{4}-\d{2}-\d{2}\/[0-9a-f-]+\.png$/),
-      image.bytes,
+      Buffer.from(image.bytes),
       { access: "public", addRandomSuffix: false, contentType: "image/png" },
     );
+    expect(Buffer.isBuffer(putMock.mock.calls[0][1])).toBe(true);
   });
 });

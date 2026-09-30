@@ -10,7 +10,7 @@ export function makeBlobPath(extension: SanitizedImageExtension, id = crypto.ran
 
 export async function putMediaBlob(image: SanitizedImage) {
   const pathname = makeBlobPath(image.extension);
-  const blob = await put(pathname, image.bytes, {
+  const blob = await put(pathname, Buffer.from(image.bytes), {
     access: "public",
     addRandomSuffix: false,
     contentType: image.mimeType,
