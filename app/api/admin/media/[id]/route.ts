@@ -1,40 +1,66 @@
 import { eq, or, sql } from "drizzle-orm";
-import { imageSize } from "image-size";
 import { requireOwner } from "@/lib/auth/owner";
 import { mapMedia } from "@/lib/content/mappers";
-import { deleteMedia, validateUpload, type MediaReference } from "@/lib/content/media";
+import { deleteMedia, type MediaReference } from "@/lib/content/media";
 import { getDb } from "@/lib/db/client";
 import { media, pageSeo, posts, siteSettings } from "@/lib/db/schema";
 import { putMediaBlob, removeMediaBlob } from "@/lib/media/blob";
+import { MEDIA_MAX_BYTES, sanitizeImage } from "@/lib/media/image-security";
+import { MediaServiceError, replaceSanitizedMedia, type MediaServiceDependencies } from "@/lib/media/media-service";
+import { assertTrustedOrigin, RequestSecurityError } from "@/lib/security/request-origin";
+import { recordSecurityEvent, type SecurityReasonCode } from "@/lib/security/security-audit";
+import { consumeUploadAllowance, UploadRateLimitError } from "@/lib/security/upload-rate-limit";
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  await requireOwner(); const { id } = await params; const body = await request.json();
-  const [row] = await getDb().update(media).set({ altText: String(body.altText ?? ""), caption: String(body.caption ?? ""), updatedAt: new Date() }).where(eq(media.id, id)).returning();
-  return row ? Response.json(mapMedia(row)) : Response.json({ error: "Media not found." }, { status: 404 });
+function json(data: unknown, status = 200) {
+  return Response.json(data, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  await requireOwner(); const { id } = await params; const form = await request.formData(); const file = form.get("file");
-  if (!(file instanceof File)) return Response.json({ error: "Choose a replacement image." }, { status: 400 });
-  const validation = validateUpload(file); if (!validation.ok) return Response.json({ error: validation.error }, { status: 400 });
-  const bytes = new Uint8Array(await file.arrayBuffer()); const dimensions = imageSize(bytes);
-  if (!dimensions.width || !dimensions.height) return Response.json({ error: "The image dimensions could not be read." }, { status: 400 });
-  const [current] = await getDb().select().from(media).where(eq(media.id, id)).limit(1);
-  if (!current) return Response.json({ error: "Media not found." }, { status: 404 });
-  const uploaded = await putMediaBlob(file);
-  try {
-    const [row] = await getDb().update(media).set({ storagePath: uploaded.pathname, publicUrl: uploaded.url, originalFilename: file.name, mimeType: file.type, width: dimensions.width, height: dimensions.height, byteSize: file.size, updatedAt: new Date() }).where(eq(media.id, id)).returning();
-    await removeMediaBlob(current.storagePath).catch(() => undefined);
-    return Response.json(mapMedia(row));
-  } catch {
-    await removeMediaBlob(uploaded.pathname).catch(() => undefined);
-    return Response.json({ error: "Replacement could not be saved." }, { status: 500 });
+function originError(request: Request) {
+  try { assertTrustedOrigin(request); return null; }
+  catch (error) {
+    if (error instanceof RequestSecurityError) return json({ error: error.publicMessage }, error.status);
+    throw error;
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
-  await requireOwner(); const { id } = await params; const [item] = await getDb().select().from(media).where(eq(media.id, id)).limit(1);
-  if (!item) return Response.json({ error: "Media not found." }, { status: 404 });
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  await requireOwner(); const rejected = originError(request); if (rejected) return rejected; const { id } = await params; const body = await request.json();
+  const [row] = await getDb().update(media).set({ altText: String(body.altText ?? ""), caption: String(body.caption ?? ""), updatedAt: new Date() }).where(eq(media.id, id)).returning();
+  return row ? json(mapMedia(row)) : json({ error: "Media not found." }, 404);
+}
+
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const owner = await requireOwner(); const rejected = originError(request); if (rejected) return rejected;
+  const declaredLength = Number(request.headers.get("content-length") ?? 0);
+  if (Number.isFinite(declaredLength) && declaredLength > MEDIA_MAX_BYTES) return json({ error: "Images must be smaller than 10 MB." }, 413);
+  let allowance: Awaited<ReturnType<typeof consumeUploadAllowance>>;
+  try { allowance = await consumeUploadAllowance({ ownerId: owner.id, request }); }
+  catch (error) {
+    if (error instanceof UploadRateLimitError) return json({ error: error.code === "rate_limited" ? "Too many upload attempts. Try again later." : "Uploads are temporarily unavailable." }, error.status);
+    throw error;
+  }
+  const { id } = await params; const form = await request.formData(); const file = form.get("file");
+  if (!(file instanceof File)) return json({ error: "Choose a replacement image." }, 400);
+  const audit = (reasonCode: string) => recordSecurityEvent({ ownerId: owner.id, eventType: "media_replacement_rejected", reasonCode: reasonCode as SecurityReasonCode, ipHash: allowance.ipHash });
+  const dependencies: MediaServiceDependencies = {
+    sanitize: sanitizeImage, put: putMediaBlob, remove: removeMediaBlob,
+    insert: async () => { throw new Error("unused"); },
+    update: async (mediaId, values) => { const [row] = await getDb().update(media).set({ ...values, updatedAt: new Date() }).where(eq(media.id, mediaId)).returning(); return row ?? null; },
+    find: async (mediaId) => { const [row] = await getDb().select({ storagePath: media.storagePath }).from(media).where(eq(media.id, mediaId)).limit(1); return row ?? null; },
+    audit,
+  };
+  try {
+    const row = await replaceSanitizedMedia(id, { bytes: new Uint8Array(await file.arrayBuffer()), originalFilename: file.name, altText: String(form.get("altText") ?? ""), caption: String(form.get("caption") ?? "") }, dependencies);
+    return json(mapMedia(row as Record<string, unknown>));
+  } catch (error) {
+    if (error instanceof MediaServiceError) { await audit(error.code as SecurityReasonCode).catch(() => undefined); return json({ error: error.publicMessage }, error.status); }
+    return json({ error: "Replacement could not be saved." }, 500);
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  await requireOwner(); const rejected = originError(request); if (rejected) return rejected; const { id } = await params; const [item] = await getDb().select().from(media).where(eq(media.id, id)).limit(1);
+  if (!item) return json({ error: "Media not found." }, 404);
   const result = await deleteMedia(id, item.storagePath, {
     findReferences: async (mediaId) => {
       const references: MediaReference[] = [];
@@ -51,5 +77,5 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     deleteRecord: async (mediaId) => { await getDb().delete(media).where(eq(media.id, mediaId)); },
     deleteObject: removeMediaBlob,
   });
-  return result.ok ? Response.json(result) : Response.json(result, { status: 409 });
+  return result.ok ? json(result) : json(result, 409);
 }
