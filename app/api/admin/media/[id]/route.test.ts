@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MediaServiceError } from "@/lib/media/media-service";
+import { MAX_MULTIPART_BYTES } from "@/lib/security/bounded-multipart";
 
 const mocks = vi.hoisted(() => ({
   requireOwner: vi.fn(),
@@ -70,7 +71,7 @@ describe("individual media routes", () => {
   });
 
   it("rejects an oversized declared replacement before parsing", async () => {
-    const request = replacement({ "content-length": String(10 * 1024 * 1024 + 1) });
+    const request = replacement({ "content-length": String(MAX_MULTIPART_BYTES + 1) });
     const formData = vi.spyOn(request, "formData");
     const response = await PUT(request, context);
     expect(response.status).toBe(413);

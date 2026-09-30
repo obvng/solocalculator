@@ -65,21 +65,11 @@ describe("rebuildMediaRow", () => {
     expect(deps.remove).not.toHaveBeenCalledWith("media/legacy.gif");
   });
 
-  it("updates before deleting the old Blob", async () => {
-    const order: string[] = [];
-    const deps = dependencies({
-      update: vi.fn(async () => { order.push("update"); }),
-      remove: vi.fn(async () => { order.push("remove-old"); }),
-    });
+  it("retains the old Blob because published article HTML may contain its literal URL", async () => {
+    const deps = dependencies();
     await expect(rebuildMediaRow(row, deps, "apply")).resolves.toEqual({ id: row.id, status: "replaced" });
-    expect(order).toEqual(["update", "remove-old"]);
-  });
-
-  it("reports old-Blob cleanup failure without undoing the committed row", async () => {
-    const deps = dependencies({ remove: vi.fn(async () => { throw new Error("delete failed"); }) });
-    await expect(rebuildMediaRow(row, deps, "apply")).resolves.toEqual({
-      id: row.id, status: "replaced", orphanCleanupFailure: true,
-    });
+    expect(deps.update).toHaveBeenCalledTimes(1);
+    expect(deps.remove).not.toHaveBeenCalledWith(row.storagePath);
   });
 });
 

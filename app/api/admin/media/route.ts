@@ -4,8 +4,9 @@ import { mapMedia } from "@/lib/content/mappers";
 import { getDb } from "@/lib/db/client";
 import { media } from "@/lib/db/schema";
 import { putMediaBlob, removeMediaBlob } from "@/lib/media/blob";
-import { MEDIA_MAX_BYTES, sanitizeImage } from "@/lib/media/image-security";
+import { sanitizeImage } from "@/lib/media/image-security";
 import { createSanitizedMedia, MediaServiceError, type MediaServiceDependencies } from "@/lib/media/media-service";
+import { MultipartBodyError, readBoundedMultipart } from "@/lib/security/bounded-multipart";
 import { assertTrustedOrigin, RequestSecurityError } from "@/lib/security/request-origin";
 import { recordSecurityEvent, type SecurityReasonCode } from "@/lib/security/security-audit";
 import { consumeUploadAllowance, UploadRateLimitError } from "@/lib/security/upload-rate-limit";
@@ -32,8 +33,6 @@ export async function POST(request: Request) {
     if (error instanceof RequestSecurityError) return json({ error: error.publicMessage }, error.status);
     throw error;
   }
-  const declaredLength = Number(request.headers.get("content-length") ?? 0);
-  if (Number.isFinite(declaredLength) && declaredLength > MEDIA_MAX_BYTES) return json({ error: "Images must be smaller than 10 MB." }, 413);
   let allowance: Awaited<ReturnType<typeof consumeUploadAllowance>>;
   try {
     allowance = await consumeUploadAllowance({ ownerId: owner.id, request });
@@ -44,7 +43,12 @@ export async function POST(request: Request) {
     }
     throw error;
   }
-  const form = await request.formData();
+  let form: FormData;
+  try { form = await readBoundedMultipart(request); }
+  catch (error) {
+    if (error instanceof MultipartBodyError) return json({ error: error.publicMessage }, error.status);
+    return json({ error: "The image upload failed." }, 400);
+  }
   const file = form.get("file");
   if (!(file instanceof File)) return json({ error: "Choose an image." }, 400);
   const audit = (reasonCode: string) => recordSecurityEvent({ ownerId: owner.id, eventType: "media_upload_rejected", reasonCode: reasonCode as SecurityReasonCode, ipHash: allowance.ipHash });

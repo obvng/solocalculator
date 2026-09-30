@@ -76,6 +76,7 @@ export async function sanitizeImage(input: Uint8Array): Promise<SanitizedImage> 
     } else {
       output = await oriented.removeAlpha().jpeg({ quality: 88, mozjpeg: true }).toBuffer();
     }
+    if (output.byteLength > MEDIA_MAX_BYTES) throw new ImageSecurityError("too_large");
 
     const rebuiltType = await fileTypeFromBuffer(Uint8Array.from(output));
     const rebuiltAccepted = rebuiltType?.ext ? acceptedTypes[rebuiltType.ext as keyof typeof acceptedTypes] : undefined;

@@ -27,7 +27,6 @@ export type RebuildEntry = {
   id: string;
   status: "skipped" | "safe" | "replaced" | "rejected" | "failed";
   reasonCode?: string;
-  orphanCleanupFailure?: boolean;
 };
 
 export function assertPublicBlobUrl(value: string) {
@@ -103,12 +102,9 @@ export async function rebuildMediaRow(row: LegacyMediaRow, dependencies: Rebuild
     return { id: row.id, status: "failed", reasonCode: "database_failed" };
   }
 
-  try {
-    await dependencies.remove(row.storagePath);
-    return { id: row.id, status: "replaced" };
-  } catch {
-    return { id: row.id, status: "replaced", orphanCleanupFailure: true };
-  }
+  // Published article HTML and editor JSON can contain the old URL directly.
+  // Keep the legacy object until a separate reference migration proves it is unused.
+  return { id: row.id, status: "replaced" };
 }
 
 function summarize(entries: RebuildEntry[]) {
@@ -118,7 +114,6 @@ function summarize(entries: RebuildEntry[]) {
     replaced: entries.filter((entry) => entry.status === "replaced").length,
     rejected: entries.filter((entry) => entry.status === "rejected").length,
     failed: entries.filter((entry) => entry.status === "failed").length,
-    orphanCleanupFailures: entries.filter((entry) => entry.orphanCleanupFailure).length,
     entries,
   };
 }

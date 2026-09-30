@@ -5,8 +5,9 @@ import { deleteMedia, type MediaReference } from "@/lib/content/media";
 import { getDb } from "@/lib/db/client";
 import { media, pageSeo, posts, siteSettings } from "@/lib/db/schema";
 import { putMediaBlob, removeMediaBlob } from "@/lib/media/blob";
-import { MEDIA_MAX_BYTES, sanitizeImage } from "@/lib/media/image-security";
+import { sanitizeImage } from "@/lib/media/image-security";
 import { MediaServiceError, replaceSanitizedMedia, type MediaServiceDependencies } from "@/lib/media/media-service";
+import { MultipartBodyError, readBoundedMultipart } from "@/lib/security/bounded-multipart";
 import { assertTrustedOrigin, RequestSecurityError } from "@/lib/security/request-origin";
 import { recordSecurityEvent, type SecurityReasonCode } from "@/lib/security/security-audit";
 import { consumeUploadAllowance, UploadRateLimitError } from "@/lib/security/upload-rate-limit";
@@ -31,15 +32,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const owner = await requireOwner(); const rejected = originError(request); if (rejected) return rejected;
-  const declaredLength = Number(request.headers.get("content-length") ?? 0);
-  if (Number.isFinite(declaredLength) && declaredLength > MEDIA_MAX_BYTES) return json({ error: "Images must be smaller than 10 MB." }, 413);
   let allowance: Awaited<ReturnType<typeof consumeUploadAllowance>>;
   try { allowance = await consumeUploadAllowance({ ownerId: owner.id, request }); }
   catch (error) {
     if (error instanceof UploadRateLimitError) return json({ error: error.code === "rate_limited" ? "Too many upload attempts. Try again later." : "Uploads are temporarily unavailable." }, error.status);
     throw error;
   }
-  const { id } = await params; const form = await request.formData(); const file = form.get("file");
+  const { id } = await params;
+  let form: FormData;
+  try { form = await readBoundedMultipart(request); }
+  catch (error) {
+    if (error instanceof MultipartBodyError) return json({ error: error.publicMessage }, error.status);
+    return json({ error: "Replacement could not be read." }, 400);
+  }
+  const file = form.get("file");
   if (!(file instanceof File)) return json({ error: "Choose a replacement image." }, 400);
   const audit = (reasonCode: string) => recordSecurityEvent({ ownerId: owner.id, eventType: "media_replacement_rejected", reasonCode: reasonCode as SecurityReasonCode, ipHash: allowance.ipHash });
   const dependencies: MediaServiceDependencies = {

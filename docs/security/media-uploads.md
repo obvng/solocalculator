@@ -2,6 +2,8 @@
 
 SoloCalculator accepts JPEG, PNG, and WebP source files from the owner dashboard. The server identifies the bytes, decodes the complete image, rejects animation and oversized dimensions, strips metadata, rebuilds the pixels, and stores only the rebuilt output in Vercel Blob.
 
+Upload routes stream the multipart request through a 10 MiB image limit plus 64 KiB of form overhead before parsing it. The rebuilt output is checked against the same 10 MiB image limit before Blob storage.
+
 SVG, GIF, documents, archives, executables, audio, video, malformed images, and unknown formats are rejected. The original filename is display-only. It never supplies a storage path, extension, or response content type.
 
 ## Server-only configuration
@@ -57,6 +59,8 @@ Do not suppress high or critical production findings. Patch them or stop the rel
 7. Run `npm run media:inventory` against Preview. Review every rejected and failed row.
 8. Back up the Preview database. Set `MEDIA_REBUILD_CONFIRM=solocalculator-media-v1`, run `npm run media:rebuild` once, then remove the value.
 9. Confirm rebuilt public pages and social images still load.
+
+The first rebuild keeps each old Blob because published article HTML and editor JSON may contain its literal URL. Remove an old object only after a separate reference scan proves that no post revision, draft, page, or social field still uses it.
 
 Do not apply the migration or rebuild to production until Preview evidence has been reviewed and production deployment has been approved.
 
@@ -118,7 +122,7 @@ No internet service can be guaranteed impossible to hack. A release is ready onl
 
 Commit branch: `codex/media-upload-security`.
 
-- Node 22.23.3: 36 test files and 167 tests passed.
+- Node 22.23.3: 37 test files and 172 tests passed.
 - ESLint completed with no reported errors.
 - TypeScript completed with no errors using `--noEmit --incremental false`.
 - Next.js 16.3.7 production build completed and generated 31 static pages.

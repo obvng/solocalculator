@@ -11,6 +11,7 @@ export class RequestSecurityError extends Error {
 interface OriginEnvironment {
   nodeEnv?: string;
   vercelUrl?: string;
+  vercelBranchUrl?: string;
   vercelProjectProductionUrl?: string;
 }
 
@@ -38,6 +39,7 @@ export function assertTrustedOrigin(request: Request, environment: OriginEnviron
   const trusted = new Set(["https://www.solocalculator.com", "https://solocalculator.com"]);
   const configuredVercelOrigins = [
     vercelOrigin(environment.vercelUrl ?? process.env.VERCEL_URL),
+    vercelOrigin(environment.vercelBranchUrl ?? process.env.VERCEL_BRANCH_URL),
     vercelOrigin(environment.vercelProjectProductionUrl ?? process.env.VERCEL_PROJECT_PRODUCTION_URL),
   ];
   configuredVercelOrigins.forEach((origin) => { if (origin) trusted.add(origin); });

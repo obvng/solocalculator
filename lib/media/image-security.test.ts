@@ -59,6 +59,23 @@ describe("sanitizeImage", () => {
     await expect(sanitizeImage(new Uint8Array(MEDIA_MAX_BYTES + 1))).rejects.toMatchObject({ code: "too_large" });
   });
 
+  it("rejects rebuilt output above the byte limit", async () => {
+    const width = 2_400;
+    const height = 2_400;
+    const pixels = Buffer.alloc(width * height * 4);
+    let state = 0x12345678;
+    for (let offset = 0; offset < pixels.length; offset += 4) {
+      state ^= state << 13; state ^= state >>> 17; state ^= state << 5;
+      pixels[offset] = state;
+      pixels[offset + 1] = state >>> 8;
+      pixels[offset + 2] = state >>> 16;
+      pixels[offset + 3] = 128;
+    }
+    const input = await sharp(pixels, { raw: { width, height, channels: 4 } }).webp().toBuffer();
+
+    await expect(sanitizeImage(input)).rejects.toMatchObject({ code: "too_large" });
+  }, 15_000);
+
   it("rejects truncated image data", async () => {
     const jpeg = await sharp({
       create: { width: 4, height: 3, channels: 3, background: "#2468ff" },

@@ -41,4 +41,12 @@ describe("security headers", () => {
     expect(publicContentSecurityPolicy).not.toMatch(/script-src[^;]*data:/);
     expect(adminContentSecurityPolicy).not.toContain("googlesyndication.com");
   });
+
+  it("allows the video hosts accepted by article sanitization", () => {
+    for (const policy of [publicContentSecurityPolicy, adminContentSecurityPolicy]) {
+      expect(policy).toMatch(/frame-src[^;]*https:\/\/www\.youtube\.com/);
+      expect(policy).toMatch(/frame-src[^;]*https:\/\/youtube\.com/);
+      expect(policy).toMatch(/frame-src[^;]*https:\/\/player\.vimeo\.com/);
+    }
+  });
 });

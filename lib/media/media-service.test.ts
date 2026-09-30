@@ -86,6 +86,13 @@ describe("createSanitizedMedia", () => {
       status: 400,
     }));
   });
+
+  it("never writes to Blob when rebuilt output exceeds the byte limit", async () => {
+    const deps = dependencies({ sanitize: vi.fn(async () => { throw new ImageSecurityError("too_large"); }) });
+    await expect(createSanitizedMedia(input, deps)).rejects.toMatchObject({ code: "too_large", status: 413 });
+    expect(deps.put).not.toHaveBeenCalled();
+    expect(deps.insert).not.toHaveBeenCalled();
+  });
 });
 
 describe("replaceSanitizedMedia", () => {

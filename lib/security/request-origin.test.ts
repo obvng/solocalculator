@@ -27,6 +27,13 @@ describe("assertTrustedOrigin", () => {
     })).not.toThrow();
   });
 
+  it("accepts the configured Vercel branch origin in a production-mode preview", () => {
+    expect(() => assertTrustedOrigin(request("https://feature.example.vercel.app"), {
+      nodeEnv: "production",
+      vercelBranchUrl: "feature.example.vercel.app",
+    })).not.toThrow();
+  });
+
   it.each(["https://evil.example", "null", "not a URL", "https://www.solocalculator.com.evil.example"])(
     "rejects the untrusted origin %s",
     (origin) => expect(() => assertTrustedOrigin(request(origin), { nodeEnv: "production" })).toThrow(RequestSecurityError),

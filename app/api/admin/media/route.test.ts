@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MediaServiceError } from "@/lib/media/media-service";
 import { RequestSecurityError } from "@/lib/security/request-origin";
 import { UploadRateLimitError } from "@/lib/security/upload-rate-limit";
+import { MAX_MULTIPART_BYTES } from "@/lib/security/bounded-multipart";
 
 const mocks = vi.hoisted(() => ({
   requireOwner: vi.fn(),
@@ -74,8 +75,8 @@ describe("POST /api/admin/media", () => {
     expect("DELETE" in mediaRoute).toBe(false);
   });
 
-  it("rejects a declared body above 10 MiB before parsing", async () => {
-    const request = uploadRequest(true, { "content-length": String(10 * 1024 * 1024 + 1) });
+  it("rejects a declared body above the bounded multipart limit before parsing", async () => {
+    const request = uploadRequest(true, { "content-length": String(MAX_MULTIPART_BYTES + 1) });
     const formData = vi.spyOn(request, "formData");
     const response = await POST(request);
 
