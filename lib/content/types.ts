@@ -95,10 +95,12 @@ export interface MediaRecord {
   storagePath: string;
   publicUrl: string;
   originalFilename: string;
-  mimeType: "image/jpeg" | "image/png" | "image/webp" | "image/gif";
+  mimeType: "image/jpeg" | "image/png" | "image/webp";
   width: number;
   height: number;
   byteSize: number;
+  sha256: string | null;
+  processingVersion: 0 | 1;
   altText: string;
   caption: string;
   createdAt: string;

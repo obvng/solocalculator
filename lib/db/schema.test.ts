@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  media,
   owners,
   sessions,
   posts,
   postRevisions,
   siteSettings,
+  securityEvents,
+  uploadRateLimits,
 } from "./schema";
 
 describe("Neon schema", () => {
@@ -14,5 +17,8 @@ describe("Neon schema", () => {
     expect(posts).toBeDefined();
     expect(postRevisions).toBeDefined();
     expect(siteSettings).toBeDefined();
+    expect(media).toBeDefined();
+    expect(securityEvents).toBeDefined();
+    expect(uploadRateLimits).toBeDefined();
   });
 });

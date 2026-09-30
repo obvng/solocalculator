@@ -55,7 +55,12 @@ export const pageSeoInputSchema = seoInputSchema.extend({
   pageKey: z.string().min(1), pathname: z.string().regex(internalPathPattern), introductionHtml: z.string().default(""),
 });
 export const taxonomyInputSchema = z.object({ name: z.string().trim().min(1).max(100), slug: z.string().regex(slugPattern), description: z.string().max(600).default(""), seo: seoInputSchema });
-export const mediaInputSchema = z.object({ storagePath: z.string().min(1), publicUrl: z.string().url().startsWith("https://"), originalFilename: z.string().min(1), mimeType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]), width: z.number().int().positive(), height: z.number().int().positive(), byteSize: z.number().int().positive(), altText: z.string().max(500).default(""), caption: z.string().max(1000).default("") });
+export const mediaInputSchema = z.object({
+  storagePath: z.string().min(1), publicUrl: z.string().url().startsWith("https://"), originalFilename: z.string().min(1).max(255),
+  mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]), width: z.number().int().positive().max(12_000), height: z.number().int().positive().max(12_000),
+  byteSize: z.number().int().positive().max(10 * 1024 * 1024), sha256: z.string().regex(/^[a-f0-9]{64}$/), processingVersion: z.literal(1),
+  altText: z.string().max(500).default(""), caption: z.string().max(1000).default(""),
+}).refine((record) => record.width * record.height <= 40_000_000, { path: ["width"], message: "Image pixel count is too large." });
 
 export const redirectInputSchema = z.object({
   sourcePath: z.string().regex(internalPathPattern), destination: safePublicUrl,

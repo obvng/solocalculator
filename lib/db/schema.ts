@@ -60,16 +60,45 @@ export const media = pgTable(
     width: integer("width").notNull(),
     height: integer("height").notNull(),
     byteSize: bigint("byte_size", { mode: "number" }).notNull(),
+    sha256: text("sha256"),
+    processingVersion: integer("processing_version").notNull().default(0),
     altText: text("alt_text").notNull().default(""),
     caption: text("caption").notNull().default(""),
     ...timestamps,
   },
   (table) => [
-    check("media_mime_type_check", sql`${table.mimeType} in ('image/jpeg','image/png','image/webp','image/gif')`),
-    check("media_width_check", sql`${table.width} > 0`),
-    check("media_height_check", sql`${table.height} > 0`),
-    check("media_byte_size_check", sql`${table.byteSize} > 0`),
+    check("media_mime_type_check", sql`${table.mimeType} in ('image/jpeg','image/png','image/webp')`),
+    check("media_width_check", sql`${table.width} > 0 and ${table.width} <= 12000`),
+    check("media_height_check", sql`${table.height} > 0 and ${table.height} <= 12000`),
+    check("media_pixel_count_check", sql`${table.width}::bigint * ${table.height}::bigint <= 40000000`),
+    check("media_byte_size_check", sql`${table.byteSize} > 0 and ${table.byteSize} <= 10485760`),
+    check("media_processing_version_check", sql`${table.processingVersion} in (0, 1)`),
+    check("media_sha256_check", sql`${table.processingVersion} = 0 or (${table.sha256} is not null and ${table.sha256} ~ '^[a-f0-9]{64}$')`),
   ],
+);
+
+export const uploadRateLimits = pgTable(
+  "upload_rate_limits",
+  {
+    key: text("key").primaryKey(),
+    windowStartedAt: timestamp("window_started_at", { withTimezone: true }).notNull(),
+    count: integer("count").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [check("upload_rate_limit_count_check", sql`${table.count} > 0`)],
+);
+
+export const securityEvents = pgTable(
+  "security_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").references(() => owners.id, { onDelete: "set null" }),
+    eventType: text("event_type").notNull(),
+    reasonCode: text("reason_code").notNull(),
+    ipHash: text("ip_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("security_events_created_index").on(table.createdAt)],
 );
 
 export const posts = pgTable(

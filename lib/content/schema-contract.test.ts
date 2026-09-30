@@ -5,6 +5,7 @@ const sql = readFileSync(
   "drizzle/0000_calm_sentry.sql",
   "utf8",
 );
+const mediaSecuritySql = readFileSync("drizzle/0002_living_black_queen.sql", "utf8");
 
 describe("content schema", () => {
   it.each([
@@ -45,5 +46,17 @@ describe("content schema", () => {
     expect(sql).toContain('INSERT INTO "page_seo"');
     expect(sql).toContain("('home', '/', 1.0, 'weekly')");
     expect(sql).toContain('INSERT INTO "site_settings" ("id") VALUES (true)');
+  });
+
+  it("adds media sanitization metadata and bounded upload controls", () => {
+    expect(mediaSecuritySql).toContain('CREATE TABLE "security_events"');
+    expect(mediaSecuritySql).toContain('CREATE TABLE "upload_rate_limits"');
+    expect(mediaSecuritySql).toContain('ADD COLUMN "sha256" text');
+    expect(mediaSecuritySql).toContain('ADD COLUMN "processing_version" integer DEFAULT 0 NOT NULL');
+    expect(mediaSecuritySql).toContain("'image/jpeg','image/png','image/webp'");
+    expect(mediaSecuritySql).not.toContain("'image/gif'");
+    expect(mediaSecuritySql).toContain("<= 40000000");
+    expect(mediaSecuritySql).toContain("<= 10485760");
+    expect(mediaSecuritySql).toContain("NOT VALID");
   });
 });
