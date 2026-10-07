@@ -26,6 +26,14 @@ describe("getLegacySeoDecision", () => {
     });
   });
 
+  it("redirects the old mortgage calculator to the current loan calculator", () => {
+    expect(getLegacySeoDecision("/mortgage-calculator.html")).toEqual({
+      type: "redirect",
+      destination: "/loan-calculator",
+      statusCode: 308,
+    });
+  });
+
   it.each([
     "/cgi-sys/suspendedpage.cgi",
     "/about-us.html",

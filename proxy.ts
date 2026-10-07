@@ -12,6 +12,7 @@ const legacyRedirects = new Map<string, string>([
   ["/index.html", "/"],
   ["/home.html", "/"],
   ["/percentage-calculator.html", "/percentage-calculator"],
+  ["/mortgage-calculator.html", "/loan-calculator"],
 ]);
 
 const removedLegacyPaths = new Set([
