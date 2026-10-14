@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mediaInputSchema, normalizeSlug, postInputSchema, redirectInputSchema } from "./validation";
+import { mediaInputSchema, normalizeSlug, pageSeoInputSchema, postInputSchema, redirectInputSchema } from "./validation";
 
 describe("content validation", () => {
   it("normalizes a readable slug", () => {
@@ -40,5 +40,27 @@ describe("content validation", () => {
     expect(() => mediaInputSchema.parse({ ...validMedia, width: 10_000, height: 4_001 })).toThrow();
     expect(() => mediaInputSchema.parse({ ...validMedia, byteSize: 10 * 1024 * 1024 + 1 })).toThrow();
     expect(() => mediaInputSchema.parse({ ...validMedia, sha256: "A".repeat(64) })).toThrow();
+  });
+
+  it("validates and supplies every editable page SEO field", () => {
+    const parsed = pageSeoInputSchema.parse({
+      pageKey: "tip-calculator",
+      pathname: "/tip-calculator",
+      introductionHtml: "",
+      title: "Tip calculator",
+      description: "Calculate a tip.",
+    });
+
+    expect(parsed.openGraph).toEqual({ title: "", description: "", imageId: null });
+    expect(parsed.xCard).toEqual({ title: "", description: "", imageId: null });
+    expect(parsed.schemaType).toBe("WebPage");
+    expect(parsed.schemaProperties).toEqual({});
+    expect(parsed.faqItems).toEqual([]);
+    expect(pageSeoInputSchema.safeParse({
+      pageKey: "tip-calculator",
+      pathname: "/tip-calculator",
+      introductionHtml: "",
+      faqItems: [{ question: 123, answer: "Invalid" }],
+    }).success).toBe(false);
   });
 });

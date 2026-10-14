@@ -19,6 +19,17 @@ const safePublicUrl = z.string().refine((value) => {
   try { return new URL(value).protocol === "https:"; } catch { return false; }
 }, "Use a site path or an HTTPS URL.");
 
+const socialMetadataSchema = z.object({
+  title: z.string().max(120).optional().default(""),
+  description: z.string().max(320).optional().default(""),
+  imageId: z.string().nullable().optional().default(null),
+});
+
+const faqItemSchema = z.object({
+  question: z.string().max(300),
+  answer: z.string().max(2_000),
+});
+
 export const seoInputSchema = z.object({
   title: z.string().max(120).optional().default(""),
   description: z.string().max(320).optional().default(""),
@@ -31,6 +42,11 @@ export const seoInputSchema = z.object({
   sitemapPriority: z.number().min(0).max(1).optional().default(0.8),
   changeFrequency: z.enum(["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"]).optional().default("monthly"),
   breadcrumbLabel: z.string().max(120).optional().default(""),
+  openGraph: socialMetadataSchema.optional().default({ title: "", description: "", imageId: null }),
+  xCard: socialMetadataSchema.optional().default({ title: "", description: "", imageId: null }),
+  schemaType: z.enum(["WebSite", "WebPage", "Article", "BlogPosting", "FAQPage", "HowTo", "SoftwareApplication"]).optional().default("WebPage"),
+  schemaProperties: z.record(z.string(), z.unknown()).optional().default({}),
+  faqItems: z.array(faqItemSchema).optional().default([]),
 }).passthrough();
 
 export const postInputSchema = z.object({
