@@ -16,9 +16,11 @@ import type { Metadata } from "next";
 import { Calculator } from "@/components/calculator/Calculator";
 import { Header } from "@/components/Header";
 import { ArticleBody } from "@/components/content/ArticleBody";
+import { JsonLd } from "@/components/content/JsonLd";
 import { getPageSeo, getPublicSettings } from "@/lib/content/repository";
 import { sanitizeArticleHtml } from "@/lib/content/sanitize";
 import { toNextMetadata } from "@/lib/seo/metadata";
+import { buildHomeJsonLd } from "@/lib/seo/schema";
 import styles from "./page.module.css";
 
 const popularTools = [
@@ -42,11 +44,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const page = await getPageSeo("home");
+  const [page, settings] = await Promise.all([getPageSeo("home"), getPublicSettings()]);
+  const siteName = settings?.siteName ?? "SoloCalculator";
   return (
     <main className={styles.viewport}>
       <div className={styles.pageShell}>
         <Header />
+        <JsonLd records={buildHomeJsonLd(siteName, page.description)} />
         <section className={styles.hero}>
           <div className={styles.decorations} aria-hidden="true">
             <span className={styles.loop} />

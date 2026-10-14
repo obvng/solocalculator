@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildJsonLd, serializeJsonLd } from "./schema";
+import { buildHomeJsonLd, buildJsonLd, serializeJsonLd } from "./schema";
 
 describe("structured data", () => {
   it("builds article and breadcrumb records from validated fields", () => {
@@ -14,5 +14,39 @@ describe("structured data", () => {
 
   it("omits an incomplete article", () => {
     expect(buildJsonLd({ type: "Article", title: "", description: "", pathname: "/blog/empty", breadcrumbs: [] })).toEqual([]);
+  });
+
+  it("builds WebApplication data for calculator pages", () => {
+    const [application] = buildJsonLd({
+      type: "WebApplication",
+      title: "Age calculator",
+      description: "Calculate your exact age.",
+      pathname: "/age-calculator",
+      breadcrumbs: [],
+    });
+
+    expect(application).toEqual(expect.objectContaining({
+      "@type": "WebApplication",
+      applicationCategory: "UtilitiesApplication",
+      operatingSystem: "Any",
+    }));
+  });
+
+  it("builds Organization and WebSite data for the homepage", () => {
+    expect(buildHomeJsonLd("SoloCalculator", "Free online calculators.")).toEqual([
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "SoloCalculator",
+        url: "https://www.solocalculator.com",
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "SoloCalculator",
+        description: "Free online calculators.",
+        url: "https://www.solocalculator.com",
+      },
+    ]);
   });
 });

@@ -10,6 +10,22 @@ describe("getPageSeo", () => {
     expect(record.title).toBe("Loan calculator | SoloCalculator");
     expect(record.pathname).toBe("/loan-calculator");
   });
+
+  it("keeps calculator metadata defaults when stored SEO fields are blank", async () => {
+    const record = await getPageSeo("age-calculator", {
+      getPageSeo: async () => ({
+        title: "",
+        description: "   ",
+        canonical: "",
+        breadcrumbLabel: "",
+      }),
+    });
+
+    expect(record.title).toBe("Age calculator | SoloCalculator");
+    expect(record.description).toBe("Calculate your exact age in years, months and days.");
+    expect(record.canonical).toBe("https://www.solocalculator.com/age-calculator");
+    expect(record.breadcrumbLabel).toBe("Age");
+  });
 });
 
 describe("mapPublishedPost", () => {
