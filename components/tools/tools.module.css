@@ -6,6 +6,16 @@
   background: rgba(255,255,255,.82);
   box-shadow: 0 18px 42px rgba(44,91,145,.12);
 }
+.formStack { display: grid; width: 100%; gap: 18px; }
+.calculationPanel {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,.96);
+  border-radius: 22px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 18px 42px rgba(44,91,145,.12);
+}
+.calculationPanel legend { padding: 0 8px; color: #07164f; font-size: 1rem; font-weight: 900; }
 .calculatorFrame { display: flex; justify-content: center; }
 .twoCols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .field { display: grid; gap: 7px; margin-bottom: 16px; }
@@ -40,9 +50,17 @@
 .resultGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 8px; }
 .resultGrid span { display: grid; gap: 2px; }
 .resultGrid b { color: #07164f; }
+.discountRows { display: grid; gap: 8px; }
+.discountRow { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+.discountRow .field { margin-bottom: 0; }
+.addButton, .textButton { border: 0; font: inherit; font-weight: 850; cursor: pointer; }
+.addButton { margin: 12px 0 16px; padding: 10px 14px; border-radius: 11px; background: #0871f7; color: #fff; }
+.textButton { margin-bottom: 5px; padding: 10px 4px; background: transparent; color: #bd3c2b; }
 @media (max-width: 620px) {
   .form, .calculatorFrame { padding: 14px; border-radius: 18px; }
   .twoCols { grid-template-columns: 1fr; gap: 0; }
   .result { min-height: 108px; }
   .resultGrid { grid-template-columns: 1fr; }
+  .formStack { gap: 13px; }
+  .calculationPanel { padding: 14px; border-radius: 18px; }
 }
