@@ -1,15 +1,19 @@
 import {
   ArrowRight,
   Cake,
+  CalendarCheck,
   CalendarBlank,
   ChartBar,
+  Clock,
   Coins,
   House,
   Heart,
   Lightning,
   Percent,
   Ruler,
+  Tag,
   TeaBag,
+  TrendUp,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -30,6 +34,14 @@ const popularTools = [
   { title: "Date", description: "Add or subtract dates easily.", href: "/date-calculator", color: "lilac", icon: CalendarBlank },
   { title: "Unit", description: "Convert units across many categories.", href: "/unit-converter", color: "yellow", icon: Ruler },
   { title: "Currency", description: "Convert between world currencies.", href: "/currency-converter", color: "mint", icon: Coins },
+];
+
+const newTools = [
+  { title: "Percentage change", description: "Compare old and new values or apply a percentage change.", href: "/percentage-increase-calculator", color: "coral", icon: TrendUp },
+  { title: "Percentage of", description: "Answer all three common percentage questions.", href: "/percentage-of-calculator", color: "blue", icon: Percent },
+  { title: "Discount", description: "Find sale prices, savings and stacked discounts.", href: "/discount-calculator", color: "yellow", icon: Tag },
+  { title: "Time duration", description: "Count hours, minutes and unpaid breaks.", href: "/time-duration-calculator", color: "lilac", icon: Clock },
+  { title: "Business days", description: "Count or add working days with flexible weekends.", href: "/business-days-calculator", color: "mint", icon: CalendarCheck },
 ];
 
 const benefits = [
@@ -86,6 +98,19 @@ export default async function Home() {
           </div>
           <div className={styles.toolGrid}>
             {popularTools.map(({ title, description, href, color, icon: Icon }) => (
+              <Link className={`${styles.toolCard} ${styles[`${color}Card`]}`} href={href} key={title}>
+                <span className={`${styles.toolIcon} ${styles[color]}`}><Icon weight="fill" /></span>
+                <strong>{title}</strong>
+                <span className={styles.toolDescription}>{description}</span>
+              </Link>
+            ))}
+          </div>
+
+          <div className={`${styles.sectionHeading} ${styles.newToolsHeading}`}>
+            <h2>New calculators</h2>
+          </div>
+          <div className={styles.newToolsGrid}>
+            {newTools.map(({ title, description, href, color, icon: Icon }) => (
               <Link className={`${styles.toolCard} ${styles[`${color}Card`]}`} href={href} key={title}>
                 <span className={`${styles.toolIcon} ${styles[color]}`}><Icon weight="fill" /></span>
                 <strong>{title}</strong>

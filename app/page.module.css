@@ -80,6 +80,8 @@
 .sectionHeading svg { width: 15px; }
 
 .toolGrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.newToolsHeading { margin-top: 24px; }
+.newToolsGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 .toolCard {
   display: flex;
   min-width: 0;
@@ -137,6 +139,7 @@
   .intro h1 { font-size: 2.5rem; }
   .benefits { gap: 10px; }
   .toolGrid { gap: 8px; }
+  .newToolsGrid { gap: 8px; }
   .toolCard { padding-inline: 7px; }
 }
 
@@ -168,6 +171,8 @@
   .sectionHeading h2, .quickHeading { font-size: 1rem; }
   .sectionHeading a { font-size: .72rem; }
   .toolGrid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .newToolsHeading { margin-top: 16px; }
+  .newToolsGrid { grid-template-columns: repeat(2, 1fr); gap: 7px; }
   .toolCard { min-height: 76px; justify-content: center; padding: 8px 4px 7px; border-radius: 9px; }
   .toolIcon { width: 35px; height: 35px; margin-bottom: 4px; }
   .toolIcon svg { width: 20px; height: 20px; }
