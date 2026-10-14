@@ -15,6 +15,20 @@
       "when": 1790618744663,
       "tag": "0001_adorable_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790773497668,
+      "tag": "0002_living_black_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791967112000,
+      "tag": "0003_tier_one_calculators",
+      "breakpoints": true
     }
   ]
 }

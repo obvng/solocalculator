@@ -1,6 +1,6 @@
 import { PRODUCTION_ORIGIN, absoluteUrl } from "./metadata";
 
-type SchemaKind = "Article" | "BlogPosting" | "WebPage";
+type SchemaKind = "Article" | "BlogPosting" | "WebPage" | "WebApplication";
 
 export interface JsonLdInput {
   type: SchemaKind;
@@ -37,6 +37,11 @@ export function buildJsonLd(input: JsonLdInput): JsonLdRecord[] {
     page.publisher = { "@type": "Organization", name: "SoloCalculator", url: PRODUCTION_ORIGIN };
   }
 
+  if (input.type === "WebApplication") {
+    page.applicationCategory = "UtilitiesApplication";
+    page.operatingSystem = "Any";
+  }
+
   const records = [page];
   if (input.breadcrumbs.length) {
     records.push({
@@ -51,6 +56,25 @@ export function buildJsonLd(input: JsonLdInput): JsonLdRecord[] {
     });
   }
   return records;
+}
+
+export function buildHomeJsonLd(siteName: string, description: string): JsonLdRecord[] {
+  if (!siteName.trim() || !description.trim()) return [];
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: siteName,
+      url: PRODUCTION_ORIGIN,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: siteName,
+      description,
+      url: PRODUCTION_ORIGIN,
+    },
+  ];
 }
 
 export function serializeJsonLd(records: JsonLdRecord[]): string {

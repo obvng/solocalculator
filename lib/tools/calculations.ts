@@ -37,6 +37,156 @@ export function calculatePercentage(mode: PercentageMode, first: number, second:
   return (second - first) / first * 100;
 }
 
+export interface PercentageChangeResult {
+  percentageChange: number;
+  difference: number;
+  direction: "increase" | "decrease" | "no-change";
+}
+
+export function calculatePercentageChange(original: number, next: number): PercentageChangeResult {
+  if (original === 0) throw new Error("Original value cannot be zero.");
+  const difference = next - original;
+  return {
+    percentageChange: difference / Math.abs(original) * 100,
+    difference,
+    direction: difference > 0 ? "increase" : difference < 0 ? "decrease" : "no-change",
+  };
+}
+
+export function calculateNewValue(original: number, percentageChange: number): number {
+  return original + original * percentageChange / 100;
+}
+
+export type PercentageOfMode = "percentOf" | "whatPercent" | "baseFromPercent";
+
+export function calculatePercentageOf(mode: PercentageOfMode, first: number, second: number): number {
+  if (mode === "percentOf") return first / 100 * second;
+  if (mode === "whatPercent") {
+    if (second === 0) throw new Error("Base value cannot be zero.");
+    return first / second * 100;
+  }
+  if (second === 0) throw new Error("Percentage cannot be zero.");
+  return first / (second / 100);
+}
+
+export interface DiscountResult {
+  finalPrice: number;
+  amountSaved: number;
+  combinedRate: number;
+}
+
+export function calculateDiscount(originalPrice: number, discounts: number[]): DiscountResult {
+  if (originalPrice < 0) throw new Error("Price cannot be negative.");
+  if (discounts.some((discount) => discount < 0 || discount > 100)) {
+    throw new Error("Discount must be between 0 and 100.");
+  }
+  const finalPrice = discounts.reduce((price, discount) => price * (1 - discount / 100), originalPrice);
+  const amountSaved = originalPrice - finalPrice;
+  const combinedRate = originalPrice === 0 ? 0 : amountSaved / originalPrice * 100;
+  return { finalPrice, amountSaved, combinedRate };
+}
+
+export function calculateDiscountRate(originalPrice: number, finalPrice: number): number {
+  if (originalPrice <= 0) throw new Error("Original price must be greater than zero.");
+  if (finalPrice < 0 || finalPrice > originalPrice) {
+    throw new Error("Final price must be between zero and the original price.");
+  }
+  return (originalPrice - finalPrice) / originalPrice * 100;
+}
+
+export interface TimeDurationInput {
+  startTime: string;
+  endTime: string;
+  startDate?: string;
+  endDate?: string;
+  breakMinutes?: number;
+}
+
+export interface TimeDurationResult {
+  elapsedMinutes: number;
+  paidMinutes: number;
+  hours: number;
+  minutes: number;
+  decimalHours: number;
+}
+
+function parseClock(value: string): number {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) throw new Error("Enter a valid time.");
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) throw new Error("Enter a valid time.");
+  return hours * 60 + minutes;
+}
+
+export function calculateTimeDuration(input: TimeDurationInput): TimeDurationResult {
+  const startMinutes = parseClock(input.startTime);
+  const endMinutes = parseClock(input.endTime);
+  const hasStartDate = Boolean(input.startDate);
+  const hasEndDate = Boolean(input.endDate);
+  if (hasStartDate !== hasEndDate) throw new Error("Enter both dates or leave both blank.");
+
+  let elapsedMinutes: number;
+  if (input.startDate && input.endDate) {
+    elapsedMinutes = daysBetween(input.startDate, input.endDate) * 1440 + endMinutes - startMinutes;
+    if (elapsedMinutes < 0) throw new Error("End must be after start.");
+  } else {
+    elapsedMinutes = endMinutes - startMinutes;
+    if (elapsedMinutes < 0) elapsedMinutes += 1440;
+  }
+
+  const breakMinutes = input.breakMinutes ?? 0;
+  if (!Number.isFinite(breakMinutes) || breakMinutes < 0) throw new Error("Break cannot be negative.");
+  if (breakMinutes > elapsedMinutes) throw new Error("Break cannot exceed the duration.");
+  const paidMinutes = elapsedMinutes - breakMinutes;
+  return {
+    elapsedMinutes,
+    paidMinutes,
+    hours: Math.floor(paidMinutes / 60),
+    minutes: paidMinutes % 60,
+    decimalHours: paidMinutes / 60,
+  };
+}
+
+export type WeekendDefinition = "sat-sun" | "fri-sat";
+
+export interface BusinessDayCount {
+  totalDays: number;
+  workingDays: number;
+  weekendDays: number;
+}
+
+function isWeekend(date: Date, weekend: WeekendDefinition): boolean {
+  const day = date.getUTCDay();
+  return weekend === "sat-sun" ? day === 0 || day === 6 : day === 5 || day === 6;
+}
+
+export function countBusinessDays(startValue: string, endValue: string, weekend: WeekendDefinition): BusinessDayCount {
+  const difference = daysBetween(startValue, endValue);
+  if (difference < 0) throw new Error("End date must be on or after start date.");
+  const cursor = parseDate(startValue);
+  let workingDays = 0;
+  let weekendDays = 0;
+  for (let offset = 0; offset <= difference; offset += 1) {
+    if (isWeekend(cursor, weekend)) weekendDays += 1;
+    else workingDays += 1;
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return { totalDays: difference + 1, workingDays, weekendDays };
+}
+
+export function addBusinessDays(startValue: string, workingDays: number, weekend: WeekendDefinition): string {
+  if (!Number.isInteger(workingDays) || workingDays < 0) throw new Error("Working days cannot be negative.");
+  if (workingDays === 0) return startValue;
+  const cursor = parseDate(startValue);
+  let added = 0;
+  while (added < workingDays) {
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+    if (!isWeekend(cursor, weekend)) added += 1;
+  }
+  return isoDate(cursor);
+}
+
 export function calculateLoan(principal: number, annualRate: number, years: number): LoanResult {
   if (principal <= 0 || annualRate < 0 || years <= 0) throw new Error("Enter positive loan values.");
   const payments = years * 12;

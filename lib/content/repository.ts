@@ -29,7 +29,15 @@ export async function getPageSeo(pageKey: string, source?: ContentDataSource): P
   const fallback = getDefaultPageSeo(pageKey);
   try {
     const record = await (source ?? await defaultDataSource()).getPageSeo(pageKey);
-    return record ? { ...fallback, ...record } : fallback;
+    if (!record) return fallback;
+    return {
+      ...fallback,
+      ...record,
+      title: record.title?.trim() ? record.title : fallback.title,
+      description: record.description?.trim() ? record.description : fallback.description,
+      canonical: record.canonical?.trim() ? record.canonical : fallback.canonical,
+      breadcrumbLabel: record.breadcrumbLabel?.trim() ? record.breadcrumbLabel : fallback.breadcrumbLabel,
+    };
   } catch { return fallback; }
 }
 

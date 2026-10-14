@@ -19,6 +19,17 @@ const safePublicUrl = z.string().refine((value) => {
   try { return new URL(value).protocol === "https:"; } catch { return false; }
 }, "Use a site path or an HTTPS URL.");
 
+const socialMetadataSchema = z.object({
+  title: z.string().max(120).optional().default(""),
+  description: z.string().max(320).optional().default(""),
+  imageId: z.string().nullable().optional().default(null),
+});
+
+const faqItemSchema = z.object({
+  question: z.string().max(300),
+  answer: z.string().max(2_000),
+});
+
 export const seoInputSchema = z.object({
   title: z.string().max(120).optional().default(""),
   description: z.string().max(320).optional().default(""),
@@ -31,6 +42,11 @@ export const seoInputSchema = z.object({
   sitemapPriority: z.number().min(0).max(1).optional().default(0.8),
   changeFrequency: z.enum(["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"]).optional().default("monthly"),
   breadcrumbLabel: z.string().max(120).optional().default(""),
+  openGraph: socialMetadataSchema.optional().default({ title: "", description: "", imageId: null }),
+  xCard: socialMetadataSchema.optional().default({ title: "", description: "", imageId: null }),
+  schemaType: z.enum(["WebSite", "WebPage", "Article", "BlogPosting", "FAQPage", "HowTo", "SoftwareApplication", "WebApplication"]).optional().default("WebPage"),
+  schemaProperties: z.record(z.string(), z.unknown()).optional().default({}),
+  faqItems: z.array(faqItemSchema).optional().default([]),
 }).passthrough();
 
 export const postInputSchema = z.object({
@@ -55,7 +71,12 @@ export const pageSeoInputSchema = seoInputSchema.extend({
   pageKey: z.string().min(1), pathname: z.string().regex(internalPathPattern), introductionHtml: z.string().default(""),
 });
 export const taxonomyInputSchema = z.object({ name: z.string().trim().min(1).max(100), slug: z.string().regex(slugPattern), description: z.string().max(600).default(""), seo: seoInputSchema });
-export const mediaInputSchema = z.object({ storagePath: z.string().min(1), publicUrl: z.string().url().startsWith("https://"), originalFilename: z.string().min(1), mimeType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]), width: z.number().int().positive(), height: z.number().int().positive(), byteSize: z.number().int().positive(), altText: z.string().max(500).default(""), caption: z.string().max(1000).default("") });
+export const mediaInputSchema = z.object({
+  storagePath: z.string().min(1), publicUrl: z.string().url().startsWith("https://"), originalFilename: z.string().min(1).max(255),
+  mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]), width: z.number().int().positive().max(12_000), height: z.number().int().positive().max(12_000),
+  byteSize: z.number().int().positive().max(10 * 1024 * 1024), sha256: z.string().regex(/^[a-f0-9]{64}$/), processingVersion: z.literal(1),
+  altText: z.string().max(500).default(""), caption: z.string().max(1000).default(""),
+}).refine((record) => record.width * record.height <= 40_000_000, { path: ["width"], message: "Image pixel count is too large." });
 
 export const redirectInputSchema = z.object({
   sourcePath: z.string().regex(internalPathPattern), destination: safePublicUrl,

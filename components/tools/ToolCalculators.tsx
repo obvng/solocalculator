@@ -16,6 +16,7 @@ import {
   type UnitCategory,
 } from "@/lib/tools/calculations";
 import type { ToolKind } from "@/lib/tools/catalog";
+import { BusinessDaysCalculator, DiscountCalculator, PercentageIncreaseCalculator, PercentageOfCalculator, TimeDurationCalculator } from "./TierOneCalculators";
 import styles from "./tools.module.css";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -123,5 +124,10 @@ export function ToolCalculator({ kind }: { kind: ToolKind }) {
   if (kind === "unit") return <UnitConverter />;
   if (kind === "currency") return <CurrencyConverter />;
   if (kind === "tip") return <TipCalculator />;
+  if (kind === "percentage-increase") return <PercentageIncreaseCalculator />;
+  if (kind === "percentage-of") return <PercentageOfCalculator />;
+  if (kind === "discount") return <DiscountCalculator />;
+  if (kind === "time-duration") return <TimeDurationCalculator />;
+  if (kind === "business-days") return <BusinessDaysCalculator />;
   return <BirthdayCalculator />;
 }

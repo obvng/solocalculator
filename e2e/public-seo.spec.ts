@@ -20,7 +20,17 @@ test("calculator SEO and discovery endpoints render", async ({ page, request }) 
   const [robots, sitemap, feed] = await Promise.all([request.get("/robots.txt"), request.get("/sitemap.xml"), request.get("/feed.xml")]);
   expect(robots.ok()).toBeTruthy();
   expect(await robots.text()).toContain("Disallow: /admin/");
-  expect(await sitemap.text()).toContain("https://www.solocalculator.com/percentage-calculator");
+  const sitemapXml = await sitemap.text();
+  expect(sitemapXml).toContain("https://www.solocalculator.com/percentage-calculator");
+  for (const slug of [
+    "percentage-increase-calculator",
+    "percentage-of-calculator",
+    "discount-calculator",
+    "time-duration-calculator",
+    "business-days-calculator",
+  ]) {
+    expect(sitemapXml).toContain(`https://www.solocalculator.com/${slug}`);
+  }
   expect(await feed.text()).toContain("<rss version=\"2.0\">");
 });
 
@@ -28,4 +38,21 @@ test("blog index never exposes drafts", async ({ page }) => {
   await page.goto("/blog");
   await expect(page.getByRole("heading", { name: "Clear answers for everyday calculations" })).toBeVisible();
   await expect(page).toHaveTitle("Helpful calculator guides | SoloCalculator");
+});
+
+test("header dropdowns and calculator directory navigate to real pages", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Calculators" }).click();
+  await page.getByRole("link", { name: "All calculators" }).click();
+  await expect(page).toHaveURL(/\/calculators$/);
+  await expect(page.getByRole("heading", { name: "All calculators" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Discount" })).toHaveAttribute("href", "/discount-calculator");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.getByRole("navigation", { name: "Mobile navigation" })).toBeVisible();
+  await page.getByRole("link", { name: "All calculators" }).click();
+  await expect(page).toHaveURL(/\/calculators$/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

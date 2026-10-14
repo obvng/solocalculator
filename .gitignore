@@ -6,3 +6,8 @@ coverage/
 *.log
 test-results/
 playwright-report/
+.env*
+!.env.example
+*.tsbuildinfo
+.superpowers/
+.neon

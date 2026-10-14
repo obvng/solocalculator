@@ -16,18 +16,22 @@ export function isSessionExpired(expiresAt: Date, now = new Date()) {
   return expiresAt.getTime() <= now.getTime();
 }
 
+export function ownerCookieOptions(expires: Date, nodeEnv = process.env.NODE_ENV) {
+  return {
+    httpOnly: true as const,
+    secure: nodeEnv === "production",
+    sameSite: "strict" as const,
+    path: "/",
+    expires,
+  };
+}
+
 export async function createOwnerSession(ownerId: string) {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
   await getDb().insert(sessions).values({ ownerId, tokenHash: hashSessionToken(token), expiresAt });
   const cookieStore = await cookies();
-  cookieStore.set(OWNER_COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    expires: expiresAt,
-  });
+  cookieStore.set(OWNER_COOKIE_NAME, token, ownerCookieOptions(expiresAt));
 }
 
 export async function getOwnerSession(): Promise<OwnerIdentity | null> {
@@ -47,5 +51,5 @@ export async function deleteOwnerSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(OWNER_COOKIE_NAME)?.value;
   if (token) await getDb().delete(sessions).where(eq(sessions.tokenHash, hashSessionToken(token)));
-  cookieStore.set(OWNER_COOKIE_NAME, "", { httpOnly: true, expires: new Date(0), path: "/", sameSite: "lax" });
+  cookieStore.set(OWNER_COOKIE_NAME, "", ownerCookieOptions(new Date(0)));
 }
