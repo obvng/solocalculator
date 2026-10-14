@@ -23,7 +23,7 @@ export function getDefaultPageSeo(pageKey: string): PageSeoRecord {
     breadcrumbLabel: home ? "Home" : tool?.shortTitle ?? "Calculator",
     sitemapPriority: home ? 1 : 0.8, changeFrequency: home ? "weekly" : "monthly",
     openGraph: { title, description, imageId: null }, xCard: { title, description, imageId: null },
-    introductionHtml: tool?.intro ? `<p>${tool.intro}</p>` : "", supportingSections: [],
+    introductionHtml: "", supportingSections: [],
     relatedPageKeys: [], relatedPostIds: [], createdAt: "", updatedAt: "",
   };
 }
