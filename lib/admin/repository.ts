@@ -77,5 +77,14 @@ export async function getAdminSettings(): Promise<SiteSettings> {
 }
 
 export async function updateAdminSettings(values: Partial<typeof siteSettings.$inferInsert>) { await getDb().update(siteSettings).set({ ...values, updatedAt: new Date() }).where(eq(siteSettings.id, true)); }
-export async function updatePageSeo(pageKey: string, values: Partial<typeof pageSeo.$inferInsert>) { await getDb().update(pageSeo).set({ ...values, updatedAt: new Date() }).where(eq(pageSeo.pageKey, pageKey)); }
+export async function updatePageSeo(pageKey: string, values: typeof pageSeo.$inferInsert) {
+  if (values.pageKey !== pageKey) throw new Error("Page SEO key does not match the requested page.");
+  const { pageKey: _pageKey, ...updates } = values;
+  const [stored] = await getDb().insert(pageSeo).values(values).onConflictDoUpdate({
+    target: pageSeo.pageKey,
+    set: { ...updates, updatedAt: new Date() },
+  }).returning();
+  if (!stored) throw new Error("Page SEO was not saved.");
+  return stored;
+}
 export async function listAdminMedia() { return getDb().select().from(media).orderBy(desc(media.createdAt)); }
