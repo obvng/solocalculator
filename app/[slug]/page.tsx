@@ -10,10 +10,10 @@ import { getPageSeo, getPublicSettings } from "@/lib/content/repository";
 import { sanitizeArticleHtml } from "@/lib/content/sanitize";
 import { toNextMetadata } from "@/lib/seo/metadata";
 import { buildJsonLd } from "@/lib/seo/schema";
-import { toolBySlug, tools } from "@/lib/tools/catalog";
+import { toolBySlug } from "@/lib/tools/catalog";
 import styles from "./tool-page.module.css";
 
-export function generateStaticParams() { return tools.map(({ slug }) => ({ slug })); }
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
