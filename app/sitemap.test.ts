@@ -20,9 +20,13 @@ describe("sitemap", () => {
       { ...getDefaultPageSeo("discount-calculator"), updatedAt: "2026-10-14T08:30:00.000Z" },
     ]);
 
-    await expect(sitemap()).resolves.toContainEqual(expect.objectContaining({
+    const entries = await sitemap();
+    expect(entries).toContainEqual(expect.objectContaining({
       url: "https://www.solocalculator.com/discount-calculator",
       lastModified: "2026-10-14T08:30:00.000Z",
+    }));
+    expect(entries).toContainEqual(expect.objectContaining({
+      url: "https://www.solocalculator.com/calculators",
     }));
   });
 });

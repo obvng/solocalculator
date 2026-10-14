@@ -39,3 +39,20 @@ test("blog index never exposes drafts", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Clear answers for everyday calculations" })).toBeVisible();
   await expect(page).toHaveTitle("Helpful calculator guides | SoloCalculator");
 });
+
+test("header dropdowns and calculator directory navigate to real pages", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Calculators" }).click();
+  await page.getByRole("link", { name: "All calculators" }).click();
+  await expect(page).toHaveURL(/\/calculators$/);
+  await expect(page.getByRole("heading", { name: "All calculators" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Discount" })).toHaveAttribute("href", "/discount-calculator");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.getByRole("navigation", { name: "Mobile navigation" })).toBeVisible();
+  await page.getByRole("link", { name: "All calculators" }).click();
+  await expect(page).toHaveURL(/\/calculators$/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});

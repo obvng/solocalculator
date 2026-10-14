@@ -94,7 +94,7 @@ export default async function Home() {
         <section className={styles.toolsPanel}>
           <div className={styles.sectionHeading}>
             <h2>Popular calculators</h2>
-            <Link href="/calculator">View all <ArrowRight weight="bold" /></Link>
+            <Link href="/calculators">View all <ArrowRight weight="bold" /></Link>
           </div>
           <div className={styles.toolGrid}>
             {popularTools.map(({ title, description, href, color, icon: Icon }) => (

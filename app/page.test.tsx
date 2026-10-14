@@ -16,6 +16,7 @@ describe("homepage calculator links", () => {
     const hrefs = [...container.querySelectorAll("a")].map((link) => link.getAttribute("href"));
 
     expect(screen.getByRole("heading", { name: "Popular calculators" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View all" })).toHaveAttribute("href", "/calculators");
     for (const href of ["/age-calculator", "/percentage-calculator", "/loan-calculator", "/date-calculator", "/unit-converter", "/currency-converter"]) {
       expect(hrefs).toContain(href);
     }

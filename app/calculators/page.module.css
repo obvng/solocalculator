@@ -1,0 +1,21 @@
+.viewport { min-height: 100vh; padding: 30px; background: radial-gradient(circle at 10% 5%, #c6e9ff 0, transparent 28%), radial-gradient(circle at 90% 8%, #e5dcff 0, transparent 30%), #edf7ff; }
+.shell { width: min(1180px, 100%); margin: 0 auto; overflow: hidden; border-radius: 24px; background: rgba(255,255,255,.88); box-shadow: 0 24px 70px rgba(44,88,136,.14); }
+.hero { padding: 64px 7% 44px; text-align: center; background: linear-gradient(135deg, rgba(225,244,255,.9), rgba(241,235,255,.82)); }
+.hero > span { color: #0877f9; font-size: .78rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+.hero h1 { margin: 10px 0 8px; color: #07164f; font-size: clamp(2.1rem, 5vw, 3.8rem); line-height: 1; }
+.hero p { max-width: 640px; margin: 0 auto; color: #476589; font-size: 1.05rem; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 34px; }
+.card { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; min-height: 118px; padding: 18px; border: 1px solid rgba(132,174,218,.25); border-radius: 18px; color: #07164f; text-decoration: none; transition: transform .18s ease, box-shadow .18s ease; }
+.card:hover, .card:focus-visible { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(44,88,136,.12); outline: none; }
+.card > span:nth-child(2) { display: grid; gap: 4px; }
+.card strong { font-size: 1rem; }
+.card small { color: #537396; font-size: .78rem; line-height: 1.35; }
+.card > svg { width: 18px; color: #0877f9; }
+.badge { display: grid; width: 44px; height: 44px; border-radius: 14px; place-items: center; color: white; font-weight: 950; background: #0877f9; }
+.blue { background: linear-gradient(145deg, #f4faff, #e9f4ff); }.blue .badge { background: #1677ff; }
+.coral { background: linear-gradient(145deg, #fff9f6, #fff0ea); }.coral .badge { background: #ff7554; }
+.mint { background: linear-gradient(145deg, #f4fffb, #e7faf4); }.mint .badge { background: #45c99a; }
+.lilac { background: linear-gradient(145deg, #fbf9ff, #f1ebff); }.lilac .badge { background: #9065f5; }
+.yellow { background: linear-gradient(145deg, #fffdf5, #fff5d9); }.yellow .badge { background: #ffb91b; }
+@media (max-width: 850px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .viewport { padding: 0; }.shell { border-radius: 0; }.hero { padding: 42px 20px 30px; }.grid { grid-template-columns: 1fr; gap: 10px; padding: 16px; }.card { min-height: 96px; } }
