@@ -6,7 +6,7 @@ describe("toNextMetadata", () => {
   it("forces canonical URLs onto the production host", () => {
     const metadata = toNextMetadata({ ...emptySeo, title: "Test article", canonical: "/blog/test" }, { siteName: "SoloCalculator", titleTemplate: "%s | SoloCalculator", defaultDescription: "Default description", defaultImageUrl: null }, "/blog/test");
     expect(metadata.alternates?.canonical).toBe("https://www.solocalculator.com/blog/test");
-    expect(metadata.title).toBe("Test article | SoloCalculator");
+    expect(metadata.title).toBe("Test article");
   });
 
   it("maps robots and social fallbacks", () => {
@@ -15,9 +15,14 @@ describe("toNextMetadata", () => {
     expect(metadata.openGraph).toEqual(expect.objectContaining({ title: "Guide", description: "Guide description", url: "https://www.solocalculator.com/blog/guide" }));
   });
 
-  it("does not append the site name twice", () => {
+  it("uses the saved SEO title exactly as written", () => {
     const metadata = toNextMetadata({ ...emptySeo, title: "SoloCalculator | Quick calculators" }, { siteName: "SoloCalculator", titleTemplate: "%s | SoloCalculator", defaultDescription: "Default", defaultImageUrl: null }, "/");
     expect(metadata.title).toBe("SoloCalculator | Quick calculators");
+  });
+
+  it("does not append the site name to a long saved title", () => {
+    const metadata = toNextMetadata({ ...emptySeo, title: "Age Calculator: Exact Age in Years, Months and Days" }, { siteName: "SoloCalculator", titleTemplate: "%s | SoloCalculator", defaultDescription: "Default", defaultImageUrl: null }, "/age-calculator");
+    expect(metadata.title).toBe("Age Calculator: Exact Age in Years, Months and Days");
   });
 });
 
