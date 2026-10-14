@@ -62,5 +62,11 @@ describe("content validation", () => {
       introductionHtml: "",
       faqItems: [{ question: 123, answer: "Invalid" }],
     }).success).toBe(false);
+    expect(pageSeoInputSchema.safeParse({
+      pageKey: "discount-calculator",
+      pathname: "/discount-calculator",
+      introductionHtml: "",
+      schemaType: "WebApplication",
+    }).success).toBe(true);
   });
 });

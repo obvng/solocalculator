@@ -1,6 +1,6 @@
 # SoloCalculator Tier 1 calculator design
 
-**Date:** 14 October 2026  
+**Date:** 14 October 2026
 **Status:** Approved direction, pending written-spec approval
 
 ## Scope

@@ -44,7 +44,7 @@ export const seoInputSchema = z.object({
   breadcrumbLabel: z.string().max(120).optional().default(""),
   openGraph: socialMetadataSchema.optional().default({ title: "", description: "", imageId: null }),
   xCard: socialMetadataSchema.optional().default({ title: "", description: "", imageId: null }),
-  schemaType: z.enum(["WebSite", "WebPage", "Article", "BlogPosting", "FAQPage", "HowTo", "SoftwareApplication"]).optional().default("WebPage"),
+  schemaType: z.enum(["WebSite", "WebPage", "Article", "BlogPosting", "FAQPage", "HowTo", "SoftwareApplication", "WebApplication"]).optional().default("WebPage"),
   schemaProperties: z.record(z.string(), z.unknown()).optional().default({}),
   faqItems: z.array(faqItemSchema).optional().default([]),
 }).passthrough();
