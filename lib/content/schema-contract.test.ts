@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const sql = readFileSync(
@@ -6,6 +6,9 @@ const sql = readFileSync(
   "utf8",
 );
 const mediaSecuritySql = readFileSync("drizzle/0002_living_black_queen.sql", "utf8");
+const tierOneSql = existsSync("drizzle/0003_tier_one_calculators.sql")
+  ? readFileSync("drizzle/0003_tier_one_calculators.sql", "utf8")
+  : "";
 
 describe("content schema", () => {
   it.each([
@@ -58,5 +61,26 @@ describe("content schema", () => {
     expect(mediaSecuritySql).toContain("<= 40000000");
     expect(mediaSecuritySql).toContain("<= 10485760");
     expect(mediaSecuritySql).toContain("NOT VALID");
+  });
+
+  it("seeds complete editable SEO records for every Tier 1 calculator", () => {
+    const records = [
+      ["percentage-increase-calculator", "Percentage Increase Calculator: Work Out % Change"],
+      ["percentage-of-calculator", "Percentage Calculator: What Percent of What Number"],
+      ["discount-calculator", "Discount Calculator: Sale Price and How Much You Save"],
+      ["time-duration-calculator", "Time Duration Calculator: Hours Between Two Times"],
+      ["business-days-calculator", "Business Days Calculator: Working Days Between Dates"],
+    ];
+
+    for (const [slug, title] of records) {
+      expect(tierOneSql).toContain(`'${slug}'`);
+      expect(tierOneSql).toContain(`'/${slug}'`);
+      expect(tierOneSql).toContain(`'${title}'`);
+      expect(tierOneSql).toContain(`'https://www.solocalculator.com/${slug}'`);
+    }
+    expect(tierOneSql.match(/WebApplication/g)).toHaveLength(5);
+    expect(tierOneSql.match(/UtilitiesApplication/g)).toHaveLength(5);
+    expect(tierOneSql.match(/true,\s*0\.8,\s*'monthly'/g)).toHaveLength(5);
+    expect(tierOneSql).toContain('ON CONFLICT ("page_key") DO NOTHING');
   });
 });

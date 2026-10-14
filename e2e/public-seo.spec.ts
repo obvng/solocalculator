@@ -20,7 +20,17 @@ test("calculator SEO and discovery endpoints render", async ({ page, request }) 
   const [robots, sitemap, feed] = await Promise.all([request.get("/robots.txt"), request.get("/sitemap.xml"), request.get("/feed.xml")]);
   expect(robots.ok()).toBeTruthy();
   expect(await robots.text()).toContain("Disallow: /admin/");
-  expect(await sitemap.text()).toContain("https://www.solocalculator.com/percentage-calculator");
+  const sitemapXml = await sitemap.text();
+  expect(sitemapXml).toContain("https://www.solocalculator.com/percentage-calculator");
+  for (const slug of [
+    "percentage-increase-calculator",
+    "percentage-of-calculator",
+    "discount-calculator",
+    "time-duration-calculator",
+    "business-days-calculator",
+  ]) {
+    expect(sitemapXml).toContain(`https://www.solocalculator.com/${slug}`);
+  }
   expect(await feed.text()).toContain("<rss version=\"2.0\">");
 });
 
