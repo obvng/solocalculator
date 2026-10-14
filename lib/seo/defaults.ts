@@ -13,7 +13,7 @@ export function getDefaultPageSeo(pageKey: string): PageSeoRecord {
   const home = pageKey === "home";
   const tool = toolBySlug.get(pageKey);
   const pathname = home ? "/" : `/${pageKey}`;
-  const title = home ? "SoloCalculator | Quick, accurate everyday calculators" : `${tool?.title ?? "Calculator"} | SoloCalculator`;
+  const title = home ? "SoloCalculator | Quick, accurate everyday calculators" : tool?.title ?? "Calculator";
   const description = home
     ? "Free, easy-to-use calculators for everyday maths, dates, loans, conversions and more."
     : tool?.description ?? "A free online calculator for everyday calculations.";

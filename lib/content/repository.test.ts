@@ -7,7 +7,7 @@ describe("getPageSeo", () => {
       getPageSeo: async () => { throw new Error("offline"); },
     });
     expect(record.pageKey).toBe("loan-calculator");
-    expect(record.title).toBe("Loan calculator | SoloCalculator");
+    expect(record.title).toBe("Loan calculator");
     expect(record.pathname).toBe("/loan-calculator");
   });
 
@@ -21,7 +21,7 @@ describe("getPageSeo", () => {
       }),
     });
 
-    expect(record.title).toBe("Age calculator | SoloCalculator");
+    expect(record.title).toBe("Age calculator");
     expect(record.description).toBe("Calculate your exact age in years, months and days.");
     expect(record.canonical).toBe("https://www.solocalculator.com/age-calculator");
     expect(record.breadcrumbLabel).toBe("Age");
