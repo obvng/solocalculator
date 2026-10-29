@@ -33,7 +33,7 @@ describe("sitemap", () => {
     expect(entries).not.toContainEqual(expect.objectContaining({
       url: "https://www.solocalculator.com/calculator",
     }));
-    expect(entries.some((entry) => entry.url.endsWith("/blog"))).toBe(false);
+    expect(entries.filter((entry) => entry.url.endsWith("/blog"))).toHaveLength(1);
     expect(entries.some((entry) => /percentage-(of|increase)-calculator$/.test(entry.url))).toBe(false);
   });
   it("includes the blog once a published post exists", async () => {

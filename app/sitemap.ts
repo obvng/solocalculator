@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...visiblePages.map((page) => ({ url: `${PRODUCTION_ORIGIN}${page.pathname === "/" ? "" : page.pathname}`, lastModified: page.updatedAt || undefined, changeFrequency: page.changeFrequency, priority: page.sitemapPriority })),
     { url: `${PRODUCTION_ORIGIN}/calculators`, changeFrequency: "weekly", priority: .8 },
-    ...(posts.length ? [{ url: `${PRODUCTION_ORIGIN}/blog`, changeFrequency: "weekly" as const, priority: .7 }] : []),
+    { url: `${PRODUCTION_ORIGIN}/blog`, changeFrequency: "weekly", priority: .7 },
     ...posts.filter((post) => post.seo.includeInSitemap && !post.seo.noIndex).map((post) => ({ url: `${PRODUCTION_ORIGIN}/blog/${post.slug}`, lastModified: post.updatedAt || post.publishedAt || undefined, changeFrequency: post.seo.changeFrequency, priority: post.seo.sitemapPriority })),
   ];
 }

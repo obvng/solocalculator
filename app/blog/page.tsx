@@ -7,12 +7,11 @@ import styles from "./blog.module.css";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const posts = await listPublishedPosts();
   return {
   title: { absolute: "Helpful calculator guides" },
   description: "Straightforward guides for everyday calculations, dates, money and conversions.",
   alternates: { canonical: "https://www.solocalculator.com/blog" },
-  robots: { index: posts.length > 0, follow: true },
+  robots: { index: true, follow: true },
   };
 }
 
