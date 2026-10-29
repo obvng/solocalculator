@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { ArticleBody } from "@/components/content/ArticleBody";
 import { JsonLd } from "@/components/content/JsonLd";
 import { getPublishedPostBySlug, getPublicSettings } from "@/lib/content/repository";
-import { toNextMetadata } from "@/lib/seo/metadata";
+import { NOT_FOUND_METADATA, toNextMetadata } from "@/lib/seo/metadata";
 import { buildJsonLd } from "@/lib/seo/schema";
 import styles from "../blog.module.css";
 
@@ -14,7 +14,7 @@ type PageProps = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const [post, settings] = await Promise.all([getPublishedPostBySlug(slug), getPublicSettings()]);
-  if (!post) return {};
+  if (!post) return NOT_FOUND_METADATA;
   return toNextMetadata(post.seo, {
     siteName: settings?.siteName ?? "SoloCalculator",
     titleTemplate: settings?.titleTemplate ?? "%s | SoloCalculator",

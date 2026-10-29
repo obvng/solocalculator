@@ -18,6 +18,7 @@ describe("sitemap", () => {
   it("uses the stored page update time as lastmod", async () => {
     content.listPublicPageSeo.mockResolvedValue([
       { ...getDefaultPageSeo("discount-calculator"), updatedAt: "2026-10-14T08:30:00.000Z" },
+      { ...getDefaultPageSeo("calculator"), pathname: "/calculator", updatedAt: "2026-10-14T08:30:00.000Z" },
     ]);
 
     const entries = await sitemap();
@@ -27,6 +28,9 @@ describe("sitemap", () => {
     }));
     expect(entries).toContainEqual(expect.objectContaining({
       url: "https://www.solocalculator.com/calculators",
+    }));
+    expect(entries).not.toContainEqual(expect.objectContaining({
+      url: "https://www.solocalculator.com/calculator",
     }));
   });
 });

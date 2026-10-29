@@ -5,10 +5,11 @@ import { listPublicRedirects } from "@/lib/content/repository";
 import { resolveRedirect } from "@/lib/content/redirects";
 
 type LegacySeoDecision =
-  | { type: "redirect"; destination: string; statusCode: 308 }
+  | { type: "redirect"; destination: string; statusCode: 301 | 308 }
   | { type: "gone" };
 
 const legacyRedirects = new Map<string, string>([
+  ["/calculator", "/calculators"],
   ["/index.html", "/"],
   ["/home.html", "/"],
   ["/percentage-calculator.html", "/percentage-calculator"],
@@ -24,7 +25,7 @@ const removedLegacyPaths = new Set([
 
 export function getLegacySeoDecision(pathname: string): LegacySeoDecision | null {
   const destination = legacyRedirects.get(pathname);
-  if (destination) return { type: "redirect", destination, statusCode: 308 };
+  if (destination) return { type: "redirect", destination, statusCode: pathname === "/calculator" ? 301 : 308 };
   if (removedLegacyPaths.has(pathname)) return { type: "gone" };
   return null;
 }

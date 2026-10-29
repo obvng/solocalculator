@@ -11,6 +11,12 @@ vi.mock("@/lib/content/sanitize", () => ({ sanitizeArticleHtml: (value: string) 
 import Home from "./page";
 
 describe("homepage calculator links", () => {
+  it("keeps a space between want and to in the main heading", async () => {
+    render(await Home());
+    const heading = screen.getByRole("heading", { level: 1, name: "What do you want to calculate?" });
+    expect(heading.textContent).toBe("What do you want to calculate?");
+  });
+
   it("keeps the popular calculators and adds a separate Tier 1 section", async () => {
     const { container } = render(await Home());
     const hrefs = [...container.querySelectorAll("a")].map((link) => link.getAttribute("href"));

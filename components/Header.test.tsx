@@ -16,7 +16,8 @@ describe("Header navigation", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Learn" }));
     expect(screen.getByRole("link", { name: "Calculator guides" })).toHaveAttribute("href", "/blog");
-    expect(screen.getByRole("link", { name: "How calculators work" })).toHaveAttribute("href", "/calculator#how-to-use");
+    expect(screen.getByRole("link", { name: "How calculators work" })).toHaveAttribute("href", "/calculators");
+    expect(document.querySelector('a[href="/calculator"]')).not.toBeInTheDocument();
   });
 
   it("opens a mobile menu with the full calculator directory link", () => {

@@ -76,7 +76,7 @@ export default async function Home() {
           </div>
 
           <div className={styles.intro}>
-            <h1>What do you want<br /><span>to calculate?</span></h1>
+            <h1>What do you want{" "}<br /><span>to calculate?</span></h1>
             <p>Quick. Accurate. Helpful calculators for<br className={styles.desktopBreak} /> everyday life.</p>
             <div className={styles.benefits}>
               {benefits.map(({ icon: Icon, text, color }, index) => (

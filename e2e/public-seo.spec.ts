@@ -11,9 +11,27 @@ test("homepage calculator starts at zero and accepts input", async ({ page }) =>
   await expect(page.getByRole("status")).toContainText("12");
 });
 
+test("retired calculator URL redirects and stays out of the sitemap", async ({ request }) => {
+  const response = await request.get("/calculator", { maxRedirects: 0 });
+  expect(response.status()).toBe(301);
+  expect(response.headers().location).toBe("/calculators");
+
+  const sitemapXml = await (await request.get("/sitemap.xml")).text();
+  expect(sitemapXml).not.toContain("<loc>https://www.solocalculator.com/calculator</loc>");
+  expect(sitemapXml).toContain("<loc>https://www.solocalculator.com/calculators</loc>");
+});
+
+test("404 responses use page-specific metadata", async ({ page }) => {
+  const response = await page.goto("/this-page-does-not-exist");
+  expect(response?.status()).toBe(404);
+  await expect(page).toHaveTitle("Page not found | SoloCalculator");
+  await expect(page.locator('meta[name="description"]').first()).toHaveAttribute("content", "The page you requested could not be found. Browse SoloCalculator calculators and guides.");
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+});
+
 test("calculator SEO and discovery endpoints render", async ({ page, request }) => {
   await page.goto("/percentage-calculator");
-  await expect(page).toHaveTitle(/Percentage calculator \| SoloCalculator/);
+  await expect(page).toHaveTitle("Percentage calculator");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.solocalculator.com/percentage-calculator");
   await expect(page.locator('input[type="number"]').first()).toHaveValue("0");
 
