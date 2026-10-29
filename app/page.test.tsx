@@ -36,7 +36,7 @@ describe("homepage calculator links", () => {
     expect(cardHrefs.length).toBeGreaterThan(0);
     expect(new Set(cardHrefs).size).toBe(cardHrefs.length);
     expect(hrefs.filter((href) => href === "/percentage-calculator")).toHaveLength(1);
-    for (const href of ["/percentage-calculator", "/discount-calculator", "/time-duration-calculator", "/business-days-calculator"]) {
+    for (const href of ["/scientific-calculator", "/percentage-calculator", "/discount-calculator", "/time-duration-calculator", "/business-days-calculator"]) {
       expect(hrefs).toContain(href);
     }
   });

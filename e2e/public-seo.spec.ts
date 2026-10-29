@@ -24,9 +24,27 @@ test("retired calculator URL redirects and stays out of the sitemap", async ({ r
 test("404 responses use page-specific metadata", async ({ page }) => {
   const response = await page.goto("/this-page-does-not-exist");
   expect(response?.status()).toBe(404);
+  expect(await response!.text()).toContain("<h1>Page not found</h1>");
+  await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Browse calculators" })).toHaveAttribute("href", "/calculators");
   await expect(page).toHaveTitle("Page not found | SoloCalculator");
   await expect(page.locator('meta[name="description"]').first()).toHaveAttribute("content", "The page you requested could not be found. Browse SoloCalculator calculators and guides.");
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+});
+
+test("directory exposes grouped tools, social metadata and a real share image", async ({ page, request }) => {
+  await page.goto("/calculators");
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute("content", "website");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", "https://www.solocalculator.com/social-image");
+  await expect(page.getByRole("heading", { level: 2 })).toHaveCount(3);
+  const records = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() || "[]");
+  expect(records.map((record: { "@type": string }) => record["@type"])).toEqual(["CollectionPage", "BreadcrumbList"]);
+  const image = await request.get("/social-image");
+  expect(image.status()).toBe(200);
+  expect(image.headers()["content-type"]).toContain("image/png");
+  const bytes = await image.body();
+  expect(bytes.readUInt32BE(16)).toBe(1200);
+  expect(bytes.readUInt32BE(20)).toBe(630);
 });
 
 test("calculator SEO and discovery endpoints render", async ({ page, request }) => {

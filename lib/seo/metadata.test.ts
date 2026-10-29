@@ -3,6 +3,11 @@ import { toNextMetadata, toVerificationMetadata } from "./metadata";
 import { emptySeo } from "./defaults";
 
 describe("toNextMetadata", () => {
+  it("uses website sharing metadata and a branded fallback image on tools", () => {
+    const metadata = toNextMetadata({ ...emptySeo, title: "Age calculator" }, { siteName: "SoloCalculator", titleTemplate: "%s", defaultDescription: "Calculate age", defaultImageUrl: null }, "/age-calculator");
+    expect(metadata.openGraph).toEqual(expect.objectContaining({ type: "website", images: [{ url: "https://www.solocalculator.com/social-image" }] }));
+    expect(metadata.twitter).toEqual(expect.objectContaining({ card: "summary_large_image" }));
+  });
   it("forces canonical URLs onto the production host", () => {
     const metadata = toNextMetadata({ ...emptySeo, title: "Test article", canonical: "/blog/test" }, { siteName: "SoloCalculator", titleTemplate: "%s | SoloCalculator", defaultDescription: "Default description", defaultImageUrl: null }, "/blog/test");
     expect(metadata.alternates?.canonical).toBe("https://www.solocalculator.com/blog/test");

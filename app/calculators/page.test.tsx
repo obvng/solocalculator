@@ -12,6 +12,9 @@ describe("calculator directory", () => {
     expect(directoryHrefs).toHaveLength(tools.length);
     expect(new Set(directoryHrefs).size).toBe(directoryHrefs.length);
     expect(screen.getByRole("heading", { name: "All calculators" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(3);
+    const schemas = JSON.parse(container.querySelector('script[type="application/ld+json"]')!.textContent!);
+    expect(schemas.map((record: { "@type": string }) => record["@type"])).toEqual(["CollectionPage", "BreadcrumbList"]);
   });
 
   it("does not link to the retired singular calculator URL", () => {
