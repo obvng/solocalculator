@@ -81,7 +81,7 @@
 
 .toolGrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
 .newToolsHeading { margin-top: 24px; }
-.newToolsGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.newToolsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .toolCard {
   display: flex;
   min-width: 0;

@@ -30,6 +30,12 @@ describe("homepage calculator links", () => {
     expect(screen.getByRole("heading", { name: "New calculators" })).toBeInTheDocument();
     expect(hrefs).not.toContain("/percentage-increase-calculator");
     expect(hrefs).not.toContain("/percentage-of-calculator");
+    const cardHrefs = [...container.querySelectorAll('a')]
+      .filter((link) => link.querySelector('strong'))
+      .map((link) => link.getAttribute('href'));
+    expect(cardHrefs.length).toBeGreaterThan(0);
+    expect(new Set(cardHrefs).size).toBe(cardHrefs.length);
+    expect(hrefs.filter((href) => href === "/percentage-calculator")).toHaveLength(1);
     for (const href of ["/percentage-calculator", "/discount-calculator", "/time-duration-calculator", "/business-days-calculator"]) {
       expect(hrefs).toContain(href);
     }
