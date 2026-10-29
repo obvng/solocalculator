@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import type { SeoRecord } from "@/lib/content/types";
 
 export const PRODUCTION_ORIGIN = "https://www.solocalculator.com";
+export const NOT_FOUND_METADATA: Metadata = {
+  title: "Page not found | SoloCalculator",
+  description: "The page you requested could not be found. Browse SoloCalculator calculators and guides.",
+  robots: { index: false, follow: true },
+};
 
 export interface MetadataDefaults {
   siteName: string;

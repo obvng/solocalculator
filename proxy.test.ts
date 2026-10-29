@@ -9,7 +9,7 @@ describe("getAdminRouteDecision", () => {
     expect(getAdminRouteDecision("/admin/login", false)).toBe("allow");
   });
   it("allows public requests", () => {
-    expect(getAdminRouteDecision("/calculator", false)).toBe("allow");
+    expect(getAdminRouteDecision("/calculators", false)).toBe("allow");
   });
 });
 
@@ -43,7 +43,11 @@ describe("getLegacySeoDecision", () => {
     expect(getLegacySeoDecision(pathname)).toEqual({ type: "gone" });
   });
 
+  it("redirects the retired singular calculator URL to the directory", () => {
+    expect(getLegacySeoDecision("/calculator")).toEqual({ type: "redirect", destination: "/calculators", statusCode: 301 });
+  });
+
   it("ignores current public pages", () => {
-    expect(getLegacySeoDecision("/calculator")).toBeNull();
+    expect(getLegacySeoDecision("/calculators")).toBeNull();
   });
 });

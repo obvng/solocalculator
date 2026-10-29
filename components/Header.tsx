@@ -12,7 +12,6 @@ type MenuName = "calculators" | "convert" | "learn";
 const menus: Record<MenuName, { label: string; href: string }[]> = {
   calculators: [
     { label: "All calculators", href: "/calculators" },
-    { label: "Standard calculator", href: "/calculator" },
     { label: "Scientific calculator", href: "/scientific-calculator" },
     { label: "Age calculator", href: "/age-calculator" },
     { label: "Percentage calculator", href: "/percentage-calculator" },
@@ -26,7 +25,7 @@ const menus: Record<MenuName, { label: string; href: string }[]> = {
   ],
   learn: [
     { label: "Calculator guides", href: "/blog" },
-    { label: "How calculators work", href: "/calculator#how-to-use" },
+    { label: "How calculators work", href: "/calculators" },
   ],
 };
 
@@ -60,7 +59,6 @@ export function Header() {
       {searchOpen && <div className={styles.searchPanel}><label><MagnifyingGlass /><input autoFocus type="search" placeholder="Search calculators" value={query} onChange={(event) => setQuery(event.target.value)} /></label><div>{matches.map((tool) => <Link href={`/${tool.slug}`} key={tool.slug} onClick={() => setSearchOpen(false)}><strong>{tool.shortTitle}</strong><span>{tool.description}</span></Link>)}</div></div>}
       {menuOpen && <nav className={styles.mobileNav} aria-label="Mobile navigation">
         <Link href="/calculators" onClick={closePanels}>All calculators</Link>
-        <Link href="/calculator" onClick={closePanels}>Calculator</Link>
         <Link href="/scientific-calculator" onClick={closePanels}>Scientific</Link>
         <Link href="/unit-converter" onClick={closePanels}>Unit converter</Link>
         <Link href="/currency-converter" onClick={closePanels}>Currency</Link>

@@ -3,31 +3,36 @@ import { expect, test } from "@playwright/test";
 const pages = [
   {
     slug: "percentage-increase-calculator",
-    title: "Percentage Increase Calculator: Work Out % Change | SoloCalculator",
+    title: "Percentage Increase Calculator: Work Out % Change",
+    heading: "Percentage increase calculator",
     description: "Calculate a percentage increase or decrease, find the absolute difference, or apply a percentage change to an original value.",
     intro: "Compare an original and new value",
   },
   {
     slug: "percentage-of-calculator",
-    title: "Percentage Calculator: What Percent of What Number | SoloCalculator",
+    title: "Percentage Calculator: What Percent of What Number",
+    heading: "Percentage of calculator",
     description: "Find a percentage of a number, what percentage one number is of another, or the whole number behind a percentage.",
     intro: "Use all three common percentage formulas",
   },
   {
     slug: "discount-calculator",
-    title: "Discount Calculator: Sale Price and How Much You Save | SoloCalculator",
+    title: "Discount Calculator: Sale Price and How Much You Save",
+    heading: "Discount calculator",
     description: "Calculate a sale price, amount saved, stacked discount rate, or the discount between an original and final price.",
     intro: "Enter one discount or stack several reductions",
   },
   {
     slug: "time-duration-calculator",
-    title: "Time Duration Calculator: Hours Between Two Times | SoloCalculator",
+    title: "Time Duration Calculator: Hours Between Two Times",
+    heading: "Time duration calculator",
     description: "Calculate hours and minutes between two times, cross midnight, include dates, and subtract an unpaid break.",
     intro: "Choose start and end times",
   },
   {
     slug: "business-days-calculator",
-    title: "Business Days Calculator: Working Days Between Dates | SoloCalculator",
+    title: "Business Days Calculator: Working Days Between Dates",
+    heading: "Business days calculator",
     description: "Count working days and weekend days between dates, or add working days using Saturday-Sunday or Friday-Saturday weekends.",
     intro: "Count an inclusive date range",
   },
@@ -46,7 +51,7 @@ test("Tier 1 routes are server-rendered with unique metadata and both schemas", 
     expect(rawHtml).toContain("Worked example");
 
     await page.goto(`/${tool.slug}`);
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: tool.heading, exact: true })).toBeVisible();
     await expect(page.getByText(tool.intro, { exact: false })).toBeVisible();
     await expect(page.getByRole("heading", { name: "How to use this calculator" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Worked example" })).toBeVisible();

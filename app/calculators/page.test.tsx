@@ -10,4 +10,9 @@ describe("calculator directory", () => {
     for (const tool of tools) expect(hrefs).toContain(`/${tool.slug}`);
     expect(screen.getByRole("heading", { name: "All calculators" })).toBeInTheDocument();
   });
+
+  it("does not link to the retired singular calculator URL", () => {
+    const { container } = render(<CalculatorsPage />);
+    expect(container.querySelector('a[href="/calculator"]')).not.toBeInTheDocument();
+  });
 });
