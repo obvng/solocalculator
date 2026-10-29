@@ -13,7 +13,6 @@ import {
   Ruler,
   Tag,
   TeaBag,
-  TrendUp,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -37,8 +36,6 @@ const popularTools = [
 ];
 
 const newTools = [
-  { title: "Percentage change", description: "Compare old and new values or apply a percentage change.", href: "/percentage-calculator", color: "coral", icon: TrendUp },
-  { title: "Percentage of", description: "Answer all three common percentage questions.", href: "/percentage-calculator", color: "blue", icon: Percent },
   { title: "Discount", description: "Find sale prices, savings and stacked discounts.", href: "/discount-calculator", color: "yellow", icon: Tag },
   { title: "Time duration", description: "Count hours, minutes and unpaid breaks.", href: "/time-duration-calculator", color: "lilac", icon: Clock },
   { title: "Business days", description: "Count or add working days with flexible weekends.", href: "/business-days-calculator", color: "mint", icon: CalendarCheck },
