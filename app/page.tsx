@@ -12,6 +12,7 @@ import {
   Percent,
   Ruler,
   Tag,
+  Calculator as CalculatorIcon,
   TeaBag,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
@@ -36,6 +37,7 @@ const popularTools = [
 ];
 
 const newTools = [
+  { title: "Scientific", description: "Calculate powers, roots, logarithms and trigonometry.", href: "/scientific-calculator", color: "blue", icon: CalculatorIcon },
   { title: "Discount", description: "Find sale prices, savings and stacked discounts.", href: "/discount-calculator", color: "yellow", icon: Tag },
   { title: "Time duration", description: "Count hours, minutes and unpaid breaks.", href: "/time-duration-calculator", color: "lilac", icon: Clock },
   { title: "Business days", description: "Count or add working days with flexible weekends.", href: "/business-days-calculator", color: "mint", icon: CalendarCheck },

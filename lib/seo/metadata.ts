@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { SeoRecord } from "@/lib/content/types";
 
 export const PRODUCTION_ORIGIN = "https://www.solocalculator.com";
+export const DEFAULT_SOCIAL_IMAGE = `${PRODUCTION_ORIGIN}/social-image`;
 export const NOT_FOUND_METADATA: Metadata = {
   title: "Page not found | SoloCalculator",
   description: "The page you requested could not be found. Browse SoloCalculator calculators and guides.",
@@ -39,7 +40,7 @@ export function toNextMetadata(
   const title = seo.title.trim() || defaults.siteName;
   const description = seo.description.trim() || defaults.defaultDescription;
   const canonical = absoluteUrl(seo.canonical, pathname);
-  const openGraphImage = images?.openGraph || defaults.defaultImageUrl;
+  const openGraphImage = images?.openGraph || defaults.defaultImageUrl || (pathname.startsWith("/blog") ? null : DEFAULT_SOCIAL_IMAGE);
   const xCardImage = images?.xCard || openGraphImage;
 
   return {
@@ -48,7 +49,7 @@ export function toNextMetadata(
     alternates: { canonical },
     robots: { index: !seo.noIndex, follow: !seo.noFollow },
     openGraph: {
-      type: "article",
+      type: pathname.startsWith("/blog/") ? "article" : "website",
       title: seo.openGraph.title.trim() || title,
       description: seo.openGraph.description.trim() || description,
       url: canonical,

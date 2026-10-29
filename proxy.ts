@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { OWNER_COOKIE_NAME } from "@/lib/auth/constants";
 import { listPublicRedirects } from "@/lib/content/repository";
 import { resolveRedirect } from "@/lib/content/redirects";
+import { toolBySlug } from "@/lib/tools/catalog";
 
 type LegacySeoDecision =
   | { type: "redirect"; destination: string; statusCode: 301 | 308 }
@@ -55,6 +56,11 @@ export async function proxy(request: NextRequest) {
     }
     const redirect = resolveRedirect(pathname, await listPublicRedirects());
     if (redirect) return NextResponse.redirect(new URL(redirect.destination, request.url), redirect.statusCode);
+    const slug = pathname.slice(1);
+    const publicRoutes = new Set(["", "blog", "calculators", "social-image"]);
+    if (!slug.includes("/") && !slug.includes(".") && !publicRoutes.has(slug) && !toolBySlug.has(slug)) {
+      return new NextResponse('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found | SoloCalculator</title><meta name="robots" content="noindex, follow"><meta name="description" content="The page you requested could not be found. Browse SoloCalculator calculators and guides."></head><body style="margin:0;background:#edf7ff;color:#07164f;font-family:system-ui,sans-serif"><main style="max-width:760px;margin:10vh auto;padding:48px;border-radius:24px;background:white"><a href="/" style="color:#006cff">SOLOCALCULATOR.COM</a><p>404</p><h1>Page not found</h1><p>The page may have moved or the address may be incorrect.</p><a href="/calculators" style="color:#006cff">Browse calculators</a></main></body></html>', { status: 404, headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex, follow" } });
+    }
   }
   return NextResponse.next();
 }
