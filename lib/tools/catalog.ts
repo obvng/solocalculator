@@ -22,7 +22,7 @@ export interface ToolDefinition {
   relatedSlugs: [string, string, string];
 }
 
-export const tools: ToolDefinition[] = [
+const catalog: ToolDefinition[] = [
   { slug: "scientific-calculator", kind: "scientific", title: "Scientific calculator", heading: "Scientific calculator", shortTitle: "Scientific", description: "Calculate trigonometry, powers, roots and logarithms online.", intro: "Use scientific functions in degrees or radians without leaving the main calculator.", example: () => "Example: enter 30, then choose sin to calculate 0.5 in degree mode.", accent: "lilac", relatedSlugs: ["unit-converter", "percentage-calculator", "percentage-of-calculator"] },
   { slug: "age-calculator", kind: "age", title: "Age calculator", heading: "Age calculator", shortTitle: "Age", description: "Calculate your exact age in years, months and days.", intro: "Choose a birth date and a comparison date to find the exact time between them.", example: ageExample, accent: "blue", relatedSlugs: ["birthday-countdown", "date-calculator", "business-days-calculator"] },
   { slug: "percentage-calculator", kind: "percentage", title: "Percentage calculator", heading: "Percentage calculator", shortTitle: "Percentage", description: "Calculate percentages, percentage shares and percentage change.", intro: "Choose the calculation you need, enter two values and get the result immediately.", example: () => "Example: 20% of 150 is 30.", accent: "coral", relatedSlugs: ["percentage-of-calculator", "percentage-increase-calculator", "discount-calculator"] },
@@ -39,6 +39,14 @@ export const tools: ToolDefinition[] = [
   { slug: "business-days-calculator", kind: "business-days", title: "Business Days Calculator: Working Days Between Dates", heading: "Business days calculator", shortTitle: "Business days", description: "Count working days and weekend days between dates, or add working days using Saturday-Sunday or Friday-Saturday weekends.", intro: "Count an inclusive date range or find a future date after a chosen number of working days without assuming one weekend pattern.", example: businessDaysExample, accent: "mint", relatedSlugs: ["date-calculator", "time-duration-calculator", "age-calculator"] },
 ];
 
+const consolidatedPercentageSlugs = new Set(["percentage-of-calculator", "percentage-increase-calculator"]);
+export const tools: ToolDefinition[] = catalog.filter((tool) => !consolidatedPercentageSlugs.has(tool.slug)).map((tool) => ({
+  ...tool,
+  relatedSlugs: [...new Set(tool.relatedSlugs.map((slug) => consolidatedPercentageSlugs.has(slug) ? "percentage-calculator" : slug))]
+    .filter((slug) => slug !== tool.slug)
+    .concat(["discount-calculator", "tip-calculator", "scientific-calculator"].filter((slug) => slug !== tool.slug && !tool.relatedSlugs.includes(slug)))
+    .filter((slug, index, all) => all.indexOf(slug) === index).slice(0, 3) as [string, string, string],
+}));
 export const toolBySlug = new Map(tools.map((tool) => [tool.slug, tool]));
 
 function ageExample(currentDate: string): string {

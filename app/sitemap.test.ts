@@ -19,6 +19,7 @@ describe("sitemap", () => {
     content.listPublicPageSeo.mockResolvedValue([
       { ...getDefaultPageSeo("discount-calculator"), updatedAt: "2026-10-14T08:30:00.000Z" },
       { ...getDefaultPageSeo("calculator"), pathname: "/calculator", updatedAt: "2026-10-14T08:30:00.000Z" },
+      ...["blog", "percentage-of-calculator", "percentage-increase-calculator"].map((slug) => getDefaultPageSeo(slug)),
     ]);
 
     const entries = await sitemap();
@@ -32,5 +33,12 @@ describe("sitemap", () => {
     expect(entries).not.toContainEqual(expect.objectContaining({
       url: "https://www.solocalculator.com/calculator",
     }));
+    expect(entries.some((entry) => entry.url.endsWith("/blog"))).toBe(false);
+    expect(entries.some((entry) => /percentage-(of|increase)-calculator$/.test(entry.url))).toBe(false);
+  });
+  it("includes the blog once a published post exists", async () => {
+    content.listPublicPageSeo.mockResolvedValue([]);
+    content.listPublishedPosts.mockResolvedValue([{ slug: "guide", seo: { includeInSitemap: true, noIndex: false } }]);
+    expect(await sitemap()).toContainEqual(expect.objectContaining({ url: "https://www.solocalculator.com/blog" }));
   });
 });

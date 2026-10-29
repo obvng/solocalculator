@@ -10,6 +10,8 @@ type LegacySeoDecision =
 
 const legacyRedirects = new Map<string, string>([
   ["/calculator", "/calculators"],
+  ["/percentage-of-calculator", "/percentage-calculator"],
+  ["/percentage-increase-calculator", "/percentage-calculator"],
   ["/index.html", "/"],
   ["/home.html", "/"],
   ["/percentage-calculator.html", "/percentage-calculator"],
@@ -25,7 +27,7 @@ const removedLegacyPaths = new Set([
 
 export function getLegacySeoDecision(pathname: string): LegacySeoDecision | null {
   const destination = legacyRedirects.get(pathname);
-  if (destination) return { type: "redirect", destination, statusCode: pathname === "/calculator" ? 301 : 308 };
+  if (destination) return { type: "redirect", destination, statusCode: pathname.endsWith(".html") ? 308 : 301 };
   if (removedLegacyPaths.has(pathname)) return { type: "gone" };
   return null;
 }
