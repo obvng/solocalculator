@@ -37,8 +37,8 @@ const popularTools = [
 ];
 
 const newTools = [
-  { title: "Percentage change", description: "Compare old and new values or apply a percentage change.", href: "/percentage-increase-calculator", color: "coral", icon: TrendUp },
-  { title: "Percentage of", description: "Answer all three common percentage questions.", href: "/percentage-of-calculator", color: "blue", icon: Percent },
+  { title: "Percentage change", description: "Compare old and new values or apply a percentage change.", href: "/percentage-calculator", color: "coral", icon: TrendUp },
+  { title: "Percentage of", description: "Answer all three common percentage questions.", href: "/percentage-calculator", color: "blue", icon: Percent },
   { title: "Discount", description: "Find sale prices, savings and stacked discounts.", href: "/discount-calculator", color: "yellow", icon: Tag },
   { title: "Time duration", description: "Count hours, minutes and unpaid breaks.", href: "/time-duration-calculator", color: "lilac", icon: Clock },
   { title: "Business days", description: "Count or add working days with flexible weekends.", href: "/business-days-calculator", color: "mint", icon: CalendarCheck },

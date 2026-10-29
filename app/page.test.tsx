@@ -28,7 +28,9 @@ describe("homepage calculator links", () => {
     }
 
     expect(screen.getByRole("heading", { name: "New calculators" })).toBeInTheDocument();
-    for (const href of ["/percentage-increase-calculator", "/percentage-of-calculator", "/discount-calculator", "/time-duration-calculator", "/business-days-calculator"]) {
+    expect(hrefs).not.toContain("/percentage-increase-calculator");
+    expect(hrefs).not.toContain("/percentage-of-calculator");
+    for (const href of ["/percentage-calculator", "/discount-calculator", "/time-duration-calculator", "/business-days-calculator"]) {
       expect(hrefs).toContain(href);
     }
   });
