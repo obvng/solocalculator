@@ -41,8 +41,6 @@ test("calculator SEO and discovery endpoints render", async ({ page, request }) 
   const sitemapXml = await sitemap.text();
   expect(sitemapXml).toContain("https://www.solocalculator.com/percentage-calculator");
   for (const slug of [
-    "percentage-increase-calculator",
-    "percentage-of-calculator",
     "discount-calculator",
     "time-duration-calculator",
     "business-days-calculator",
@@ -55,7 +53,7 @@ test("calculator SEO and discovery endpoints render", async ({ page, request }) 
 test("blog index never exposes drafts", async ({ page }) => {
   await page.goto("/blog");
   await expect(page.getByRole("heading", { name: "Clear answers for everyday calculations" })).toBeVisible();
-  await expect(page).toHaveTitle("Helpful calculator guides | SoloCalculator");
+  await expect(page).toHaveTitle("Helpful calculator guides");
 });
 
 test("header dropdowns and calculator directory navigate to real pages", async ({ page }) => {

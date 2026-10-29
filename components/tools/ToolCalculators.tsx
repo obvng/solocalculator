@@ -6,13 +6,11 @@ import {
   addToDate,
   calculateAge,
   calculateLoan,
-  calculatePercentage,
   calculateTip,
   convertUnit,
   daysBetween,
   daysUntilBirthday,
   unitOptions,
-  type PercentageMode,
   type UnitCategory,
 } from "@/lib/tools/calculations";
 import type { ToolKind } from "@/lib/tools/catalog";
@@ -44,12 +42,7 @@ function AgeCalculator() {
 }
 
 function PercentageCalculator() {
-  const [mode, setMode] = useState<PercentageMode>("percentOf");
-  const [first, setFirst] = useState("0");
-  const [second, setSecond] = useState("0");
-  const result = useMemo(() => { try { return calculatePercentage(mode, number(first), number(second)); } catch { return null; } }, [mode, first, second]);
-  const labels = mode === "percentOf" ? ["Percentage", "Number"] : mode === "whatPercent" ? ["First number", "Second number"] : ["Starting value", "New value"];
-  return <div className={styles.form}><Select label="Calculation" value={mode} onChange={(value) => setMode(value as PercentageMode)}><option value="percentOf">What is X% of Y?</option><option value="whatPercent">X is what percent of Y?</option><option value="change">Percentage change</option></Select><div className={styles.twoCols}><Field label={labels[0]} value={first} onChange={setFirst} /><Field label={labels[1]} value={second} onChange={setSecond} /></div><Result label="Result">{result === null ? "Check the values" : `${neat(result)}${mode === "percentOf" ? "" : "%"}`}</Result></div>;
+  return <div className={styles.form}><PercentageOfCalculator /><PercentageIncreaseCalculator /></div>;
 }
 
 function LoanCalculator() {

@@ -4,7 +4,8 @@ import { PRODUCTION_ORIGIN } from "@/lib/seo/metadata";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [pages, posts] = await Promise.all([listPublicPageSeo(), listPublishedPosts()]);
-  const visiblePages = pages.filter((page) => page.pathname !== "/calculator" && page.includeInSitemap && !page.noIndex);
+  const excluded = new Set(["/calculator", "/percentage-of-calculator", "/percentage-increase-calculator", "/blog"]);
+  const visiblePages = pages.filter((page) => !excluded.has(page.pathname) && page.includeInSitemap && !page.noIndex);
   return [
     ...visiblePages.map((page) => ({ url: `${PRODUCTION_ORIGIN}${page.pathname === "/" ? "" : page.pathname}`, lastModified: page.updatedAt || undefined, changeFrequency: page.changeFrequency, priority: page.sitemapPriority })),
     { url: `${PRODUCTION_ORIGIN}/calculators`, changeFrequency: "weekly", priority: .8 },

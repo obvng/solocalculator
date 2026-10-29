@@ -3,8 +3,6 @@ import { getDefaultPageSeo } from "@/lib/seo/defaults";
 import { toolBySlug, tools } from "./catalog";
 
 const expected = [
-  ["percentage-increase-calculator", "Percentage Increase Calculator: Work Out % Change", "Percentage increase calculator", "coral"],
-  ["percentage-of-calculator", "Percentage Calculator: What Percent of What Number", "Percentage of calculator", "blue"],
   ["discount-calculator", "Discount Calculator: Sale Price and How Much You Save", "Discount calculator", "yellow"],
   ["time-duration-calculator", "Time Duration Calculator: Hours Between Two Times", "Time duration calculator", "lilac"],
   ["business-days-calculator", "Business Days Calculator: Working Days Between Dates", "Business days calculator", "mint"],
@@ -34,5 +32,12 @@ describe("Tier 1 tool catalog", () => {
   it("does not expose the retired singular calculator URL", () => {
     expect(toolBySlug.has("calculator")).toBe(false);
     expect(tools.flatMap((tool) => tool.relatedSlugs)).not.toContain("calculator");
+  });
+  it("offers percentage calculations on one canonical tool page", () => {
+    expect(toolBySlug.has("percentage-calculator")).toBe(true);
+    for (const slug of ["percentage-of-calculator", "percentage-increase-calculator"]) {
+      expect(toolBySlug.has(slug)).toBe(false);
+      expect(tools.flatMap((tool) => tool.relatedSlugs)).not.toContain(slug);
+    }
   });
 });

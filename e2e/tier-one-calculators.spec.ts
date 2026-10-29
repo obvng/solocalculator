@@ -2,18 +2,11 @@ import { expect, test } from "@playwright/test";
 
 const pages = [
   {
-    slug: "percentage-increase-calculator",
-    title: "Percentage Increase Calculator: Work Out % Change",
-    heading: "Percentage increase calculator",
-    description: "Calculate a percentage increase or decrease, find the absolute difference, or apply a percentage change to an original value.",
-    intro: "Compare an original and new value",
-  },
-  {
-    slug: "percentage-of-calculator",
-    title: "Percentage Calculator: What Percent of What Number",
-    heading: "Percentage of calculator",
-    description: "Find a percentage of a number, what percentage one number is of another, or the whole number behind a percentage.",
-    intro: "Use all three common percentage formulas",
+    slug: "percentage-calculator",
+    title: "Percentage calculator",
+    heading: "Percentage calculator",
+    description: "Calculate percentages, percentage shares and percentage change.",
+    intro: "Choose the calculation you need",
   },
   {
     slug: "discount-calculator",
@@ -76,6 +69,7 @@ test("Tier 1 routes are server-rendered with unique metadata and both schemas", 
 
 test("percentage increase updates live and handles a zero original value", async ({ page }) => {
   await page.goto("/percentage-increase-calculator");
+  await expect(page).toHaveURL(/\/percentage-calculator$/);
   const comparison = page.getByRole("group", { name: "Percentage change" });
   await comparison.getByLabel("Original value", { exact: true }).fill("80");
   await comparison.getByLabel("New value").fill("100");
@@ -87,6 +81,7 @@ test("percentage increase updates live and handles a zero original value", async
 
 test("percentage-of shows live results and rejects a zero base", async ({ page }) => {
   await page.goto("/percentage-of-calculator");
+  await expect(page).toHaveURL(/\/percentage-calculator$/);
   const percentOf = page.getByRole("group", { name: "What is X% of Y?" });
   await percentOf.getByLabel("Percentage (X)").fill("20");
   await percentOf.getByLabel("Number (Y)").fill("150");

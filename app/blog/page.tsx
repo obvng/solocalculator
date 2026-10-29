@@ -4,11 +4,16 @@ import { PostList } from "@/components/content/PostList";
 import { listPublishedPosts } from "@/lib/content/repository";
 import styles from "./blog.module.css";
 
-export const metadata: Metadata = {
-  title: "Helpful calculator guides | SoloCalculator",
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+  title: { absolute: "Helpful calculator guides" },
   description: "Straightforward guides for everyday calculations, dates, money and conversions.",
   alternates: { canonical: "https://www.solocalculator.com/blog" },
-};
+  robots: { index: true, follow: true },
+  };
+}
 
 export default async function BlogPage() {
   const posts = await listPublishedPosts();
