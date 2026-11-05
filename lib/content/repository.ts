@@ -25,10 +25,12 @@ async function defaultDataSource(): Promise<ContentDataSource> {
   };
 }
 
-export async function getPageSeo(pageKey: string, source?: ContentDataSource): Promise<PageSeoRecord> {
+export async function getPageSeo(pageKey: string, source?: ContentDataSource, options: { strict?: boolean } = {}): Promise<PageSeoRecord> {
+  pageKey = pageKey === "calculator" ? "calculators" : pageKey;
   const fallback = getDefaultPageSeo(pageKey);
   try {
-    const record = await (source ?? await defaultDataSource()).getPageSeo(pageKey);
+    const data = source ?? await defaultDataSource();
+    const record = await data.getPageSeo(pageKey) ?? (pageKey === "calculators" ? await data.getPageSeo("calculator") : null);
     if (!record) return fallback;
     return {
       ...fallback,
@@ -37,8 +39,9 @@ export async function getPageSeo(pageKey: string, source?: ContentDataSource): P
       description: record.description?.trim() ? record.description : fallback.description,
       canonical: record.canonical?.trim() ? record.canonical : fallback.canonical,
       breadcrumbLabel: record.breadcrumbLabel?.trim() ? record.breadcrumbLabel : fallback.breadcrumbLabel,
+      ...(pageKey === "calculators" ? { pageKey, pathname: "/calculators", slug: "calculators", canonical: "https://www.solocalculator.com/calculators" } : {}),
     };
-  } catch { return fallback; }
+  } catch (error) { if (options.strict) throw error; return fallback; }
 }
 
 export async function getPublishedPostBySlug(slug: string): Promise<PostRecord | null> {
@@ -85,10 +88,10 @@ export async function listPublicRedirects(): Promise<RedirectRecord[]> {
 }
 
 export async function listPublicPageSeo(): Promise<PageSeoRecord[]> {
-  const defaultKeys = ["home", ...tools.map((tool) => tool.slug)];
+  const defaultKeys = ["home", "calculators", ...tools.map((tool) => tool.slug)];
   try {
     const rows = await getDb().select({ pageKey: pageSeo.pageKey }).from(pageSeo);
-    const keys = new Set([...defaultKeys, ...rows.map((row) => row.pageKey)]);
+    const keys = new Set([...defaultKeys, ...rows.map((row) => row.pageKey === "calculator" ? "calculators" : row.pageKey)]);
     return Promise.all([...keys].map((pageKey) => getPageSeo(pageKey)));
   } catch { return defaultKeys.map(getDefaultPageSeo); }
 }

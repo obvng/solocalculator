@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db/client";
 import { categories, media, pageSeo, postRevisions, posts, redirectHistory, redirects, seoAuditResults, siteSettings, tags } from "@/lib/db/schema";
 import { mapRedirect, mapSeo, mapSiteSettings } from "@/lib/content/mappers";
 import type { PostRecord, RedirectRecord, SiteSettings } from "@/lib/content/types";
+import { getPageSeo } from "@/lib/content/repository";
 
 type PublishablePost = Pick<typeof posts.$inferSelect, "id" | "title" | "slug" | "excerpt" | "sanitizedHtml" | "authorDisplayName" | "featuredImageId" | "socialImageId" | "seo" | "relatedPageKeys" | "relatedPostIds" | "publishedAt">;
 
@@ -62,7 +63,14 @@ export async function publishPost(id: string) {
   });
 }
 
-export async function listAdminPages() { return getDb().select().from(pageSeo).orderBy(asc(pageSeo.pathname)); }
+export async function listAdminPages() {
+  const rows = await getDb().select().from(pageSeo).orderBy(asc(pageSeo.pathname));
+  const keys = new Set(["calculators", ...rows.map((row) => row.pageKey === "calculator" ? "calculators" : row.pageKey)]);
+  return Promise.all([...keys].map(async (key) => {
+    const page = await getPageSeo(key, undefined, { strict: true });
+    return { ...page, browserTitle: page.title };
+  }));
+}
 export async function listAdminTaxonomies() { const database = getDb(); const [categoryRows, tagRows] = await Promise.all([database.select().from(categories).orderBy(asc(categories.name)), database.select().from(tags).orderBy(asc(tags.name))]); return { categories: categoryRows, tags: tagRows }; }
 export async function saveTaxonomy(kind: "category" | "tag", input: { name: string; slug: string; description: string }) { const table = kind === "category" ? categories : tags; await getDb().insert(table).values(input); }
 export async function listAdminRedirects(): Promise<RedirectRecord[]> { return (await getDb().select().from(redirects).orderBy(asc(redirects.sourcePath))).map(mapRedirect); }

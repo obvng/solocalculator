@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PageSeoRecord } from "@/lib/content/types";
-import { buildPageSeoValues } from "./page-seo-values";
+import { buildPageSeoValues, submittedPageSeo } from "./page-seo-values";
 
 const page: PageSeoRecord = {
   id: "page-1",
@@ -32,6 +32,14 @@ const page: PageSeoRecord = {
 };
 
 describe("buildPageSeoValues", () => {
+  it("uses submitted fields even when the hidden snapshot is stale", () => {
+    const form = new FormData();
+    form.set("seoJson", JSON.stringify(page));
+    form.set("seoTitle", "New title typed immediately before Save");
+    form.set("seoDescription", "New visible description");
+    form.set("canonical", "https://www.solocalculator.com/calculators");
+    expect(submittedPageSeo(form)).toEqual(expect.objectContaining({ title: "New title typed immediately before Save", description: "New visible description", canonical: "https://www.solocalculator.com/calculators" }));
+  });
   it("maps validated page SEO data to every editable database column", () => {
     expect(buildPageSeoValues(page)).toEqual({
       pageKey: "tip-calculator",

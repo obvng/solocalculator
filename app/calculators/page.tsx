@@ -4,19 +4,15 @@ import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { Header } from "@/components/Header";
 import { tools } from "@/lib/tools/catalog";
 import { JsonLd } from "@/components/content/JsonLd";
-import { DEFAULT_SOCIAL_IMAGE, PRODUCTION_ORIGIN } from "@/lib/seo/metadata";
+import { PRODUCTION_ORIGIN, toNextMetadata } from "@/lib/seo/metadata";
+import { getPageSeo, getPublicSettings } from "@/lib/content/repository";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-  title: "All Calculators",
-  description: "Browse every SoloCalculator tool for percentages, dates, time, money, conversions and everyday calculations.",
-  alternates: { canonical: "/calculators" },
-  openGraph: {
-    type: "website", title: "All Calculators", description: "Browse every SoloCalculator tool for percentages, dates, time, money, conversions and everyday calculations.",
-    url: `${PRODUCTION_ORIGIN}/calculators`, siteName: "SoloCalculator", images: [{ url: DEFAULT_SOCIAL_IMAGE, width: 1200, height: 630 }],
-  },
-  twitter: { card: "summary_large_image", title: "All Calculators", description: "Browse every SoloCalculator tool for percentages, dates, time, money, conversions and everyday calculations.", images: [DEFAULT_SOCIAL_IMAGE] },
-};
+export const dynamic = "force-dynamic";
+export async function generateMetadata(): Promise<Metadata> {
+  const [seo, settings] = await Promise.all([getPageSeo("calculators"), getPublicSettings()]);
+  return toNextMetadata(seo, { siteName: settings?.siteName ?? "SoloCalculator", titleTemplate: "%s", defaultDescription: seo.description, defaultImageUrl: null }, "/calculators");
+}
 
 const groups = [
   { title: "Maths and percentages", slugs: ["scientific-calculator", "percentage-calculator", "discount-calculator"] },

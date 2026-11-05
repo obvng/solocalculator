@@ -2,8 +2,29 @@
 import { revalidatePath } from "next/cache"; import { redirect } from "next/navigation";
 import { requireOwner } from "@/lib/auth/owner"; import { deleteOwnerSession } from "@/lib/auth/session"; import { createAdminRedirect, deleteAdminRedirect, listAdminRedirects, updateAdminSettings, updatePageSeo } from "@/lib/admin/repository"; import { buildPageSeoValues } from "@/lib/admin/page-seo-values"; import { validateRedirectGraph } from "@/lib/content/redirects"; import { pageSeoInputSchema, redirectInputSchema, siteSettingsInputSchema } from "@/lib/content/validation"; import type { SeoRecord } from "@/lib/content/types";
 import { normalizeAdSenseInput } from "@/lib/adsense/config";
+import { submittedPageSeo } from "@/lib/admin/page-seo-values";
 
-export async function savePageSeo(pageKey: string, formData: FormData) { await requireOwner(); let seo: SeoRecord; try { seo = JSON.parse(String(formData.get("seoJson") ?? "{}")); } catch { redirect(`/admin/pages/${pageKey}?error=seo`); } const pathname = String(formData.get("pathname") ?? "/"); const introductionHtml = String(formData.get("introductionHtml") ?? ""); const parsed = pageSeoInputSchema.safeParse({ ...seo, pageKey, pathname, introductionHtml }); if (!parsed.success) redirect(`/admin/pages/${pageKey}?error=validation`); try { await updatePageSeo(pageKey, buildPageSeoValues(parsed.data)); } catch { redirect(`/admin/pages/${pageKey}?error=save`); } revalidatePath(pathname); revalidatePath("/admin/pages"); revalidatePath(`/admin/pages/${pageKey}`); revalidatePath("/sitemap.xml"); redirect(`/admin/pages/${pageKey}?saved=1`); }
+export async function savePageSeo(pageKey: string, formData: FormData) {
+  await requireOwner();
+  pageKey = pageKey === "calculator" ? "calculators" : pageKey;
+  let seo: SeoRecord;
+  try { seo = submittedPageSeo(formData); } catch { redirect(`/admin/pages/${pageKey}?error=seo`); }
+  const pathname = pageKey === "calculators" ? "/calculators" : String(formData.get("pathname") ?? "/");
+  if (pageKey === "calculators") seo.canonical = "https://www.solocalculator.com/calculators";
+  const introductionHtml = String(formData.get("introductionHtml") ?? "");
+  const parsed = pageSeoInputSchema.safeParse({ ...seo, pageKey, pathname, introductionHtml });
+  if (!parsed.success) redirect(`/admin/pages/${pageKey}?error=validation`);
+  try {
+    const values = buildPageSeoValues(parsed.data);
+    const stored = await updatePageSeo(pageKey, values);
+    if (stored.browserTitle !== values.browserTitle || stored.metaDescription !== values.metaDescription || stored.canonicalUrl !== values.canonicalUrl) throw new Error("Saved SEO values did not match the submitted form.");
+  } catch { redirect(`/admin/pages/${pageKey}?error=save`); }
+  revalidatePath(pathname);
+  revalidatePath("/admin/pages");
+  revalidatePath(`/admin/pages/${pageKey}`);
+  revalidatePath("/sitemap.xml");
+  redirect(`/admin/pages/${pageKey}?saved=1`);
+}
 
 export async function createRedirect(formData: FormData) { await requireOwner(); const input = { sourcePath: String(formData.get("sourcePath") ?? ""), destination: String(formData.get("destination") ?? ""), statusCode: Number(formData.get("statusCode")), enabled: formData.get("enabled") === "on" }; const parsed = redirectInputSchema.safeParse(input); if (!parsed.success) redirect("/admin/redirects?error=validation"); const existing = await listAdminRedirects(); try { validateRedirectGraph([...existing, { id: "new", ...input, statusCode: input.statusCode as 301 | 302 | 307 | 308, createdAt: "", updatedAt: "" }]); } catch { redirect("/admin/redirects?error=loop"); } try { await createAdminRedirect({ ...input, statusCode: input.statusCode as 301 | 302 | 307 | 308 }); } catch { redirect("/admin/redirects?error=save"); } revalidatePath(input.sourcePath); revalidatePath("/admin/redirects"); }
 export async function deleteRedirect(id: string) { await requireOwner(); await deleteAdminRedirect(id); revalidatePath("/admin/redirects"); }

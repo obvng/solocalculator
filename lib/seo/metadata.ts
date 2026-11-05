@@ -4,7 +4,7 @@ import type { SeoRecord } from "@/lib/content/types";
 export const PRODUCTION_ORIGIN = "https://www.solocalculator.com";
 export const DEFAULT_SOCIAL_IMAGE = `${PRODUCTION_ORIGIN}/social-image`;
 export const NOT_FOUND_METADATA: Metadata = {
-  title: "Page not found | SoloCalculator",
+  title: "Page not found",
   description: "The page you requested could not be found. Browse SoloCalculator calculators and guides.",
   robots: { index: false, follow: true },
 };

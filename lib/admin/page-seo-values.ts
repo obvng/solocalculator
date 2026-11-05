@@ -1,5 +1,16 @@
 import type { ChangeFrequency, FaqItem, SchemaType, SocialMetadata } from "@/lib/content/types";
 import type { pageSeo } from "@/lib/db/schema";
+import type { SeoRecord } from "@/lib/content/types";
+
+export function submittedPageSeo(formData: FormData): SeoRecord {
+  const snapshot = JSON.parse(String(formData.get("seoJson") ?? "{}")) as SeoRecord;
+  return {
+    ...snapshot,
+    title: formData.has("seoTitle") ? String(formData.get("seoTitle")) : snapshot.title,
+    description: formData.has("seoDescription") ? String(formData.get("seoDescription")) : snapshot.description,
+    canonical: formData.has("canonical") ? String(formData.get("canonical")) : snapshot.canonical,
+  };
+}
 
 export interface EditablePageSeoInput {
   pageKey: string;
