@@ -2,6 +2,23 @@ import { describe, expect, it } from "vitest";
 import { getPageSeo, listPublishedPosts, mapPublishedPost } from "./repository";
 
 describe("getPageSeo", () => {
+  it("does not silently substitute defaults in the admin on a failed read", async () => {
+    await expect(getPageSeo("home", { getPageSeo: async () => { throw new Error("offline"); } }, { strict: true })).rejects.toThrow("offline");
+  });
+  it("preserves stranded directory SEO and normalizes the retired path", async () => {
+    const calls: string[] = [];
+    const record = await getPageSeo("calculators", { getPageSeo: async (key) => {
+      calls.push(key);
+      return key === "calculator" ? { pageKey: key, pathname: "/calculator", canonical: "https://www.solocalculator.com/calculator", title: "All Calculators: Age, Percentage, Loan, Date and More", description: "Saved directory description" } : null;
+    } });
+    expect(calls).toEqual(["calculators", "calculator"]);
+    expect(record).toEqual(expect.objectContaining({ pageKey: "calculators", pathname: "/calculators", canonical: "https://www.solocalculator.com/calculators", title: "All Calculators: Age, Percentage, Loan, Date and More", description: "Saved directory description" }));
+  });
+  it("prefers the canonical directory record once it has been saved", async () => {
+    const record = await getPageSeo("calculator", { getPageSeo: async (key) => ({ title: key === "calculators" ? "Updated directory title" : "Old title" }) });
+    expect(record.title).toBe("Updated directory title");
+    expect(record.pageKey).toBe("calculators");
+  });
   it("uses code defaults when the database read fails", async () => {
     const record = await getPageSeo("loan-calculator", {
       getPageSeo: async () => { throw new Error("offline"); },

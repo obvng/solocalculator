@@ -27,7 +27,7 @@ test("404 responses use page-specific metadata", async ({ page }) => {
   expect(await response!.text()).toContain("<h1>Page not found</h1>");
   await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Browse calculators" })).toHaveAttribute("href", "/calculators");
-  await expect(page).toHaveTitle("Page not found | SoloCalculator");
+  await expect(page).toHaveTitle("Page not found");
   await expect(page.locator('meta[name="description"]').first()).toHaveAttribute("content", "The page you requested could not be found. Browse SoloCalculator calculators and guides.");
   await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
 });
