@@ -49,6 +49,14 @@ export async function getAdminPost(id: string): Promise<PostRecord | null> {
 }
 
 export async function saveAdminPost(id: string, values: Partial<typeof posts.$inferInsert>) {
+  if (values.status && values.status !== "published") {
+    return getDb().transaction(async (tx) => {
+      const [row] = await tx.update(posts).set({ ...values, updatedAt: new Date() }).where(eq(posts.id, id)).returning();
+      if (!row) return null;
+      await tx.update(postRevisions).set({ isCurrent: false }).where(eq(postRevisions.postId, id));
+      return row;
+    });
+  }
   const [row] = await getDb().update(posts).set({ ...values, updatedAt: new Date() }).where(eq(posts.id, id)).returning();
   return row ?? null;
 }
