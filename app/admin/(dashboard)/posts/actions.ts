@@ -12,6 +12,17 @@ export async function createPost() {
   try { redirect(`/admin/posts/${await createDraftPost()}`); } catch (error) { if ((error as { digest?: string }).digest?.startsWith("NEXT_REDIRECT")) throw error; redirect("/admin/posts?error=create"); }
 }
 
+export async function trashDraftPost(id: string) {
+  await requireOwner();
+  const current = await getAdminPost(id);
+  if (!current || current.status !== "draft") redirect("/admin/posts?error=not-draft");
+  const saved = await saveAdminPost(id, { status: "archived", version: current.version + 1 });
+  if (!saved) redirect(`/admin/posts/${id}?error=save`);
+  revalidatePath("/admin/posts");
+  revalidatePath(`/admin/posts/${id}`);
+  redirect("/admin/posts?trashed=1");
+}
+
 export async function savePost(id: string, formData: FormData) {
   await requireOwner();
   const intent = String(formData.get("intent") ?? "draft");
