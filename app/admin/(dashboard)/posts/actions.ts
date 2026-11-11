@@ -27,7 +27,7 @@ export async function savePost(id: string, formData: FormData) {
 
   const current = await getAdminPost(id);
   if (!current) redirect("/admin/posts?error=missing");
-  const publishedAt = status === "published" ? new Date() : null;
+  const publishedAt = current.publishedAt ? new Date(current.publishedAt) : status === "published" ? new Date() : null;
   const saved = await saveAdminPost(id, {
     title, slug, excerpt: String(formData.get("excerpt") ?? ""), sourceHtml, sanitizedHtml,
     editorDocument: JSON.parse(String(formData.get("editorDocument") ?? '{"type":"doc","content":[]}')), seo,

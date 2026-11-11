@@ -1,9 +1,30 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const database = vi.hoisted(() => ({ insert: vi.fn() }));
+const database = vi.hoisted(() => ({ insert: vi.fn(), transaction: vi.fn() }));
 vi.mock("@/lib/db/client", () => ({ getDb: () => database }));
 
-import { buildRevisionSnapshot, updatePageSeo } from "./repository";
+import { buildRevisionSnapshot, saveAdminPost, updatePageSeo } from "./repository";
+import { posts, postRevisions } from "@/lib/db/schema";
+
+describe("withdrawing an article", () => {
+  it("changes the draft status and retires public revisions in one transaction", async () => {
+    const saved = { id: "source", status: "draft" };
+    const setPost = vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(async () => [saved]) })) }));
+    const setRevisions = vi.fn(() => ({ where: vi.fn(async () => undefined) }));
+    const update = vi.fn((table) => ({ set: table === posts ? setPost : setRevisions }));
+    database.transaction.mockImplementation(async (work) => work({ update }));
+    await expect(saveAdminPost("source", { status: "draft" })).resolves.toEqual(saved);
+    expect(database.transaction).toHaveBeenCalled();
+    expect(update).toHaveBeenCalledWith(postRevisions);
+    expect(setRevisions).toHaveBeenCalledWith({ isCurrent: false });
+  });
+  it("does not touch public revisions if the article does not exist", async () => {
+    const update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn(async () => []) })) })) }));
+    database.transaction.mockImplementation(async (work) => work({ update }));
+    await expect(saveAdminPost("missing", { status: "draft" })).resolves.toBeNull();
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe("buildRevisionSnapshot", () => {
   it("copies publishable fields into the next immutable revision", () => {
