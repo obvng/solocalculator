@@ -2,6 +2,9 @@ import type { MetadataRoute } from "next";
 import { listPublicPageSeo, listPublishedPosts } from "@/lib/content/repository";
 import { PRODUCTION_ORIGIN } from "@/lib/seo/metadata";
 
+// Published articles can be withdrawn without a deployment.
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [pages, posts] = await Promise.all([listPublicPageSeo(), listPublishedPosts()]);
   const excluded = new Set(["/calculator", "/percentage-of-calculator", "/percentage-increase-calculator", "/blog"]);
