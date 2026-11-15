@@ -20,7 +20,9 @@ import styles from "./tools.module.css";
 const today = () => new Date().toISOString().slice(0, 10);
 const number = (value: string) => Number(value || 0);
 const neat = (value: number, maximumFractionDigits = 6) => new Intl.NumberFormat("en", { maximumFractionDigits }).format(value);
-const money = (value: number, currency = "USD") => new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: 2 }).format(value);
+const money = (value: number, currency?: string) => new Intl.NumberFormat("en", currency
+  ? { style: "currency", currency, maximumFractionDigits: 2 }
+  : { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 
 function Field({ label, value, onChange, type = "number", min, step }: { label: string; value: string; onChange: (value: string) => void; type?: string; min?: string; step?: string }) {
   return <label className={styles.field}><span>{label}</span><input type={type} value={value} min={min} step={step} onChange={(event) => onChange(event.target.value)} /></label>;

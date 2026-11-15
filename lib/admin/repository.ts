@@ -4,6 +4,7 @@ import { categories, media, pageSeo, postRevisions, posts, redirectHistory, redi
 import { mapRedirect, mapSeo, mapSiteSettings } from "@/lib/content/mappers";
 import type { PostRecord, RedirectRecord, SiteSettings } from "@/lib/content/types";
 import { getPageSeo } from "@/lib/content/repository";
+import { tools } from "@/lib/tools/catalog";
 
 type PublishablePost = Pick<typeof posts.$inferSelect, "id" | "title" | "slug" | "excerpt" | "sanitizedHtml" | "authorDisplayName" | "featuredImageId" | "socialImageId" | "seo" | "relatedPageKeys" | "relatedPostIds" | "publishedAt">;
 
@@ -73,7 +74,7 @@ export async function publishPost(id: string) {
 
 export async function listAdminPages() {
   const rows = await getDb().select().from(pageSeo).orderBy(asc(pageSeo.pathname));
-  const keys = new Set(["calculators", ...rows.map((row) => row.pageKey === "calculator" ? "calculators" : row.pageKey)]);
+  const keys = new Set(["home", "calculators", ...tools.map((tool) => tool.slug), ...rows.map((row) => row.pageKey === "calculator" ? "calculators" : row.pageKey)]);
   return Promise.all([...keys].map(async (key) => {
     const page = await getPageSeo(key, undefined, { strict: true });
     return { ...page, browserTitle: page.title };

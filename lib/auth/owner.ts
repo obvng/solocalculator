@@ -12,6 +12,7 @@ export function isAllowedOwner(
 export interface OwnerIdentity {
   id: string;
   email: string;
+  sessionExpiresAt?: Date;
 }
 
 export async function requireOwner(): Promise<OwnerIdentity> {
