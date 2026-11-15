@@ -7,6 +7,8 @@ const messages: Record<string, string> = {
   missing: "Enter your email and password.",
   unauthorized: "This account cannot access the dashboard.",
   credentials: "The email or password is incorrect.",
+  rate_limited: "Too many sign-in attempts. Please wait 15 minutes before trying again.",
+  unavailable: "Sign-in is temporarily unavailable. Please try again later.",
 };
 
 export default async function AdminLogin({

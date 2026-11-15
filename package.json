@@ -32,33 +32,36 @@
     "@tiptap/extension-underline": "3.31.3",
     "@tiptap/react": "3.31.3",
     "@tiptap/starter-kit": "3.31.3",
-    "@vercel/blob": "2.8.0",
+    "@vercel/blob": "2.9.0",
     "drizzle-orm": "0.45.3",
     "file-type": "22.1.1",
     "image-size": "2.0.4",
-    "next": "16.3.7",
+    "next": "16.4.6",
     "postgres": "^3.4.7",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "sanitize-html": "2.17.7",
+    "sanitize-html": "2.18.2",
     "sharp": "0.35.5",
     "tsx": "^4.20.6",
-    "zod": "4.6.5"
+    "zod": "4.6.7"
+  },
+  "overrides": {
+    "@vercel/oidc": "4.0.9"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@playwright/test": "1.63.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
-    "@types/node": "^20.19.17",
+    "@types/node": "22.20.5",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@types/sanitize-html": "2.16.1",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.35.0",
-    "eslint-config-next": "^16.3.6",
+    "eslint-config-next": "16.4.6",
     "jsdom": "^26.1.0",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "5.1.0"
   }
 }

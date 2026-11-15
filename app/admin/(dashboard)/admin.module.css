@@ -20,7 +20,7 @@
 .workQueue { display: flex; justify-content: space-between; gap: 2rem; align-items: center; margin-top: 1rem; padding: 2rem; border-radius: 1.2rem; background: #dff4ff; }
 .workQueue h2 { margin: 0 0 .4rem; font-size: 1.4rem; }.workQueue p { margin: 0; color: #40527d; }.workQueue > div:last-child { display: flex; gap: .7rem; }.workQueue a:last-child { background: white; color: #075fcf; }
 
-:global(.admin-table-wrap) { overflow-x: auto; }:global(.admin-table) { width: 100%; border-collapse: collapse; background: white; }:global(.admin-table th), :global(.admin-table td) { padding: .9rem; border-bottom: 1px solid #e4e9f3; text-align: left; }
+.main :global(.admin-table-wrap) { overflow-x: auto; }.main :global(.admin-table) { width: 100%; border-collapse: collapse; background: white; }.main :global(.admin-table th), .main :global(.admin-table td) { padding: .9rem; border-bottom: 1px solid #e4e9f3; text-align: left; }
 
 @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; }.nav { position: static; height: auto; }.nav > div { grid-template-columns: repeat(2, 1fr); }.siteLink { margin-top: 1.5rem; }.metrics { grid-template-columns: 1fr; }.workQueue, .pageHeader { align-items: flex-start; flex-direction: column; } }
 @media (max-width: 520px) { .nav > div { grid-template-columns: 1fr; }.main { padding: 1.25rem; }.workQueue > div:last-child { flex-direction: column; width: 100%; } }

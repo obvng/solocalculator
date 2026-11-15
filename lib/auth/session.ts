@@ -37,7 +37,7 @@ export async function createOwnerSession(ownerId: string) {
 export async function getOwnerSession(): Promise<OwnerIdentity | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(OWNER_COOKIE_NAME)?.value;
-  if (!token) return null;
+  if (!token || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
   const [record] = await getDb()
     .select({ id: owners.id, email: owners.email })
     .from(sessions)

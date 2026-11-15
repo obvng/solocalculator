@@ -40,7 +40,8 @@ export async function consumeUploadAllowance(
   if (!secret || secret.length < 32) throw new UploadRateLimitError("unavailable", 503);
 
   const ip = normalizeClientIp(input.request);
-  const key = createHmac("sha256", secret).update(`${input.ownerId}\0${ip}`).digest("hex");
+  const key = createHmac("sha256", secret).update(`upload-owner\0${input.ownerId}`).digest("hex");
+  const ipHash = createHmac("sha256", secret).update(`upload-ip\0${ip}`).digest("hex");
   const windowStartedAt = new Date(Date.now() - UPLOAD_RATE_LIMIT_WINDOW_MS);
 
   try {
@@ -56,7 +57,7 @@ export async function consumeUploadAllowance(
     const count = resultCount(result);
     if (!Number.isInteger(count)) throw new Error("invalid limiter result");
     if (count > UPLOAD_RATE_LIMIT_MAX) throw new UploadRateLimitError("rate_limited", 429);
-    return { count, ipHash: key };
+    return { count, ipHash };
   } catch (error) {
     if (error instanceof UploadRateLimitError) throw error;
     throw new UploadRateLimitError("unavailable", 503);
