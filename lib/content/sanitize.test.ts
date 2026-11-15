@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { sanitizeArticleHtml } from "./sanitize";
+import { sanitizeArticleHtml, sanitizeArticleHtmlWithReport } from "./sanitize";
 
 describe("sanitizeArticleHtml", () => {
+  it("preserves exponents and subscripts without allowing scripts or attributes", () => {
+    expect(sanitizeArticleHtml('<p>1.005<sup onclick="bad()">60</sup> and H<sub>2</sub>O</p>')).toBe('<p>1.005<sup>60</sup> and H<sub>2</sub>O</p>');
+  });
+  it("reports removed tags so the editor can warn before publishing", () => {
+    const result = sanitizeArticleHtmlWithReport('<p>1.005<sup>60</sup><widget>Unsupported</widget></p><script>bad()</script>');
+    expect(result.html).toBe('<p>1.005<sup>60</sup>Unsupported</p>');
+    expect(result.removedTags).toEqual(["script", "widget"]);
+  });
   it("removes scripts, event handlers, and unsafe links", () => {
     const html = '<p onclick="steal()">Hi <a href="javascript:steal()">there</a></p><script>steal()</script>';
     expect(sanitizeArticleHtml(html)).toBe("<p>Hi <a>there</a></p>");

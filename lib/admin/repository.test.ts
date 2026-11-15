@@ -1,10 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const database = vi.hoisted(() => ({ insert: vi.fn(), transaction: vi.fn() }));
+const database = vi.hoisted(() => ({ insert: vi.fn(), transaction: vi.fn(), select: vi.fn() }));
 vi.mock("@/lib/db/client", () => ({ getDb: () => database }));
 
-import { buildRevisionSnapshot, saveAdminPost, updatePageSeo } from "./repository";
+import { buildRevisionSnapshot, saveAdminPost, updatePageSeo, listAdminPages } from "./repository";
 import { posts, postRevisions } from "@/lib/db/schema";
+
+describe("calculator admin catalogue", () => {
+  it("includes every current tool even before its first SEO save", async () => {
+    database.select.mockReturnValue({ from: () => ({ orderBy: async () => [], where: () => ({ limit: async () => [] }) }) });
+    const pages = await listAdminPages();
+    for (const slug of ["discount-calculator", "time-duration-calculator", "business-days-calculator"]) {
+      expect(pages.find((page) => page.pageKey === slug)).toMatchObject({ pathname: `/${slug}` });
+    }
+    expect(pages.some((page) => page.pageKey === "percentage-of-calculator")).toBe(false);
+  });
+});
 
 describe("withdrawing an article", () => {
   it("changes the draft status and retires public revisions in one transaction", async () => {

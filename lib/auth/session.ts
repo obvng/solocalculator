@@ -6,7 +6,7 @@ import { owners, sessions } from "@/lib/db/schema";
 import type { OwnerIdentity } from "./owner";
 import { OWNER_COOKIE_NAME } from "./constants";
 
-const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+const SESSION_DURATION_MS = 90 * 24 * 60 * 60 * 1000;
 
 export function hashSessionToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -39,12 +39,25 @@ export async function getOwnerSession(): Promise<OwnerIdentity | null> {
   const token = cookieStore.get(OWNER_COOKIE_NAME)?.value;
   if (!token || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
   const [record] = await getDb()
-    .select({ id: owners.id, email: owners.email })
+    .select({ id: owners.id, email: owners.email, sessionExpiresAt: sessions.expiresAt })
     .from(sessions)
     .innerJoin(owners, eq(sessions.ownerId, owners.id))
     .where(and(eq(sessions.tokenHash, hashSessionToken(token)), gt(sessions.expiresAt, new Date())))
     .limit(1);
   return record ?? null;
+}
+
+export async function extendOwnerSession(ownerId: string) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(OWNER_COOKIE_NAME)?.value;
+  if (!token || !/^[A-Za-z0-9_-]{43}$/.test(token)) throw new Error("Session could not be renewed");
+  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
+  const [updated] = await getDb().update(sessions).set({ expiresAt }).where(and(
+    eq(sessions.ownerId, ownerId), eq(sessions.tokenHash, hashSessionToken(token)), gt(sessions.expiresAt, new Date()),
+  )).returning({ id: sessions.id });
+  if (!updated) throw new Error("Session could not be renewed");
+  cookieStore.set(OWNER_COOKIE_NAME, token, ownerCookieOptions(expiresAt));
+  return expiresAt;
 }
 
 export async function deleteOwnerSession() {

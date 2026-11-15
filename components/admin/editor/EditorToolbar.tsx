@@ -12,6 +12,8 @@ export function EditorToolbar({ editor, sourceMode, onToggleSource }: { editor: 
     ["Bold", () => editor?.chain().focus().toggleBold().run(), "B"],
     ["Italic", () => editor?.chain().focus().toggleItalic().run(), "I"],
     ["Underline", () => editor?.chain().focus().toggleUnderline().run(), "U"],
+    ["Superscript", () => editor?.chain().focus().toggleSuperscript().run(), "x²"],
+    ["Subscript", () => editor?.chain().focus().toggleSubscript().run(), "x₂"],
     ["Bullet list", () => editor?.chain().focus().toggleBulletList().run(), "List"],
     ["Numbered list", () => editor?.chain().focus().toggleOrderedList().run(), "1. List"],
     ["Quote", () => editor?.chain().focus().toggleBlockquote().run(), "Quote"],
