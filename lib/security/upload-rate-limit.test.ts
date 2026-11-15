@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { consumeUploadAllowance, normalizeClientIp, UploadRateLimitError } from "./upload-rate-limit";
+import { PgDialect } from "drizzle-orm/pg-core";
 
 const originalEnv = { ...process.env };
 afterEach(() => { process.env = { ...originalEnv }; });
@@ -9,6 +10,16 @@ function uploadRequest(headers: Record<string, string> = {}) {
 }
 
 describe("upload rate limiting", () => {
+  it("keeps the owner budget unchanged when forwarded IP headers change", async () => {
+    process.env.UPLOAD_RATE_LIMIT_SECRET = "s".repeat(32);
+    const keys: unknown[] = [];
+    for (const ip of ["203.0.113.7", "198.51.100.8"]) {
+      await consumeUploadAllowance({ ownerId: "owner-1", request: uploadRequest({ "x-forwarded-for": ip }) }, {
+        execute: async (query) => { keys.push(new PgDialect().sqlToQuery(query).params[0]); return [{ count: 1 }]; },
+      });
+    }
+    expect(keys[0]).toBe(keys[1]);
+  });
   it("normalizes the first forwarded IPv4 or IPv6 address", () => {
     expect(normalizeClientIp(uploadRequest({ "x-forwarded-for": " 203.0.113.7, 198.51.100.2" }))).toBe("203.0.113.7");
     expect(normalizeClientIp(uploadRequest({ "x-forwarded-for": "2001:db8::1, forged-value" }))).toBe("2001:db8::1");
