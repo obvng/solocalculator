@@ -1,4 +1,17 @@
 import { PRODUCTION_ORIGIN, absoluteUrl } from "./metadata";
+import type { FaqItem } from "@/lib/content/types";
+
+export function completeFaqItems(items: FaqItem[]) {
+  return items.map((item) => ({ question: item.question.trim(), answer: item.answer.trim() })).filter((item) => item.question && item.answer);
+}
+
+export function buildFaqJsonLd(items: FaqItem[]): Record<string, unknown>[] {
+  const complete = completeFaqItems(items);
+  if (!complete.length) return [];
+  return [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: complete.map((item) => ({
+    "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })) }];
+}
 
 type SchemaKind = "Article" | "BlogPosting" | "WebPage" | "WebApplication";
 

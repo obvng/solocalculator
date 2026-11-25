@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { ArticleBody } from "@/components/content/ArticleBody";
 import { JsonLd } from "@/components/content/JsonLd";
 import { getPublishedPostBySlug, getPublicSettings } from "@/lib/content/repository";
-import { NOT_FOUND_METADATA, toNextMetadata } from "@/lib/seo/metadata";
+import { DEFAULT_SOCIAL_IMAGE, NOT_FOUND_METADATA, toNextMetadata } from "@/lib/seo/metadata";
 import { buildJsonLd } from "@/lib/seo/schema";
 import styles from "../blog.module.css";
 
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     siteName: settings?.siteName ?? "SoloCalculator",
     titleTemplate: settings?.titleTemplate ?? "%s | SoloCalculator",
     defaultDescription: settings?.defaultDescription ?? post.excerpt,
-    defaultImageUrl: null,
+    defaultImageUrl: `${DEFAULT_SOCIAL_IMAGE}?title=${encodeURIComponent(post.title)}`,
   }, `/blog/${post.slug}`);
 }
 

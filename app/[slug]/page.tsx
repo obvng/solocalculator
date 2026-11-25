@@ -9,7 +9,7 @@ import { ToolCalculator } from "@/components/tools/ToolCalculators";
 import { getPageSeo, getPublicSettings } from "@/lib/content/repository";
 import { sanitizeArticleHtml } from "@/lib/content/sanitize";
 import { NOT_FOUND_METADATA, toNextMetadata } from "@/lib/seo/metadata";
-import { buildJsonLd } from "@/lib/seo/schema";
+import { buildFaqJsonLd, completeFaqItems, buildJsonLd } from "@/lib/seo/schema";
 import { toolBySlug } from "@/lib/tools/catalog";
 import styles from "./tool-page.module.css";
 
@@ -33,6 +33,8 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
     return item ? [item] : [];
   });
   const records = buildJsonLd({ type: "WebApplication", title: page.title || tool.title, description: page.description || tool.description, pathname: page.pathname, breadcrumbs: [{ name: "Home", path: "/" }, { name: page.breadcrumbLabel || tool.shortTitle, path: page.pathname }] });
+  const faqs = completeFaqItems(page.faqItems);
+  records.push(...buildFaqJsonLd(faqs));
   const currentDate = new Date().toISOString().slice(0, 10);
-  return <main className={styles.viewport}><div className={styles.shell}><Header /><JsonLd records={records} /><section className={`${styles.hero} ${styles[tool.accent]}`}><div className={styles.copy}><span className={styles.crumb}><Link href="/">Home</Link> / {page.breadcrumbLabel || tool.shortTitle}</span><h1>{tool.heading}</h1><p>{tool.intro}</p></div><div className={styles.tool}><ToolCalculator kind={tool.kind} /></div></section><section className={styles.content} id="how-to-use"><article>{page.introductionHtml ? <ArticleBody html={sanitizeArticleHtml(page.introductionHtml)} /> : null}<h2>How to use this calculator</h2><p>Enter the values requested above. The result updates as you change each field, so you can compare different values without reloading the page.</p><h2>Worked example</h2><p>{tool.example(currentDate)}</p>{page.supportingSections.map((section) => <section key={section.heading}><h2>{section.heading}</h2><ArticleBody html={sanitizeArticleHtml(section.html)} /></section>)}</article><aside><h2>Related calculators</h2>{related.map((item) => <Link key={item.slug} href={`/${item.slug}`}><span>{item.shortTitle}</span><ArrowRight /></Link>)}</aside></section></div></main>;
+  return <main className={styles.viewport}><div className={styles.shell}><Header /><JsonLd records={records} /><section className={`${styles.hero} ${styles[tool.accent]}`}><div className={styles.copy}><span className={styles.crumb}><Link href="/">Home</Link> / {page.breadcrumbLabel || tool.shortTitle}</span><h1>{tool.heading}</h1><p>{tool.intro}</p></div><div className={styles.tool}><ToolCalculator kind={tool.kind} /></div></section><section className={styles.content} id="how-to-use"><article>{page.introductionHtml ? <ArticleBody html={sanitizeArticleHtml(page.introductionHtml)} /> : null}<h2>How to use this calculator</h2><p>Enter the values requested above. The result updates as you change each field, so you can compare different values without reloading the page.</p><h2>Worked example</h2><p>{tool.example(currentDate)}</p>{page.supportingSections.map((section) => <section key={section.heading}><h2>{section.heading}</h2><ArticleBody html={sanitizeArticleHtml(section.html)} /></section>)}{faqs.length ? <section aria-labelledby="calculator-faqs"><h2 id="calculator-faqs">Frequently asked questions</h2>{faqs.map((item, index) => <div key={index}><h3>{item.question}</h3><p style={{ whiteSpace: "pre-line" }}>{item.answer}</p></div>)}</section> : null}</article><aside><h2>Related calculators</h2>{related.map((item) => <Link key={item.slug} href={`/${item.slug}`}><span>{item.shortTitle}</span><ArrowRight /></Link>)}</aside></section></div></main>;
 }

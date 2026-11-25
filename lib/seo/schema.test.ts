@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { buildHomeJsonLd, buildJsonLd, serializeJsonLd } from "./schema";
+import { buildHomeJsonLd, buildJsonLd, buildFaqJsonLd, serializeJsonLd } from "./schema";
 
 describe("structured data", () => {
+  it("builds FAQPage only from complete visible questions and answers", () => {
+    expect(buildFaqJsonLd([{ question: " Can I split the bill? ", answer: " Yes. " }, { question: "Incomplete", answer: "" }])).toEqual([{
+      "@context": "https://schema.org", "@type": "FAQPage", mainEntity: [{ "@type": "Question", name: "Can I split the bill?", acceptedAnswer: { "@type": "Answer", text: "Yes." } }],
+    }]);
+    expect(buildFaqJsonLd([])).toEqual([]);
+  });
   it("builds article and breadcrumb records from validated fields", () => {
     const records = buildJsonLd({ type: "Article", title: "Percentage guide", description: "A guide", pathname: "/blog/percentage-guide", author: "SoloCalculator", publishedAt: "2026-09-28T09:00:00.000Z", modifiedAt: "2026-09-28T10:00:00.000Z", breadcrumbs: [{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }] });
     expect(records).toContainEqual(expect.objectContaining({ "@type": "Article", headline: "Percentage guide" }));

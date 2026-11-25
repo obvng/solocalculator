@@ -3,6 +3,13 @@ import { toNextMetadata, toVerificationMetadata } from "./metadata";
 import { emptySeo } from "./defaults";
 
 describe("toNextMetadata", () => {
+  it("never omits sharing images on blog pages or future articles", () => {
+    for (const path of ["/blog", "/blog/new-guide"]) {
+      const result = toNextMetadata(emptySeo, { siteName: "SoloCalculator", titleTemplate: "%s", defaultDescription: "Guides", defaultImageUrl: null }, path);
+      expect(result.openGraph).toMatchObject({ images: [{ url: "https://www.solocalculator.com/social-image" }] });
+      expect(result.twitter).toMatchObject({ card: "summary_large_image", images: ["https://www.solocalculator.com/social-image"] });
+    }
+  });
   it("uses website sharing metadata and a branded fallback image on tools", () => {
     const metadata = toNextMetadata({ ...emptySeo, title: "Age calculator" }, { siteName: "SoloCalculator", titleTemplate: "%s", defaultDescription: "Calculate age", defaultImageUrl: null }, "/age-calculator");
     expect(metadata.openGraph).toEqual(expect.objectContaining({ type: "website", images: [{ url: "https://www.solocalculator.com/social-image" }] }));
