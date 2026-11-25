@@ -1,4 +1,5 @@
 "use server";
+import { isDeepStrictEqual } from "node:util";
 import { revalidatePath } from "next/cache"; import { redirect } from "next/navigation";
 import { requireOwner } from "@/lib/auth/owner"; import { deleteOwnerSession } from "@/lib/auth/session"; import { createAdminRedirect, deleteAdminRedirect, listAdminRedirects, updateAdminSettings, updatePageSeo } from "@/lib/admin/repository"; import { buildPageSeoValues } from "@/lib/admin/page-seo-values"; import { validateRedirectGraph } from "@/lib/content/redirects"; import { pageSeoInputSchema, redirectInputSchema, siteSettingsInputSchema } from "@/lib/content/validation"; import type { SeoRecord } from "@/lib/content/types";
 import { normalizeAdSenseInput } from "@/lib/adsense/config";
@@ -17,7 +18,7 @@ export async function savePageSeo(pageKey: string, formData: FormData) {
   try {
     const values = buildPageSeoValues(parsed.data);
     const stored = await updatePageSeo(pageKey, values);
-    if (stored.browserTitle !== values.browserTitle || stored.metaDescription !== values.metaDescription || stored.canonicalUrl !== values.canonicalUrl) throw new Error("Saved SEO values did not match the submitted form.");
+    if (stored.browserTitle !== values.browserTitle || stored.metaDescription !== values.metaDescription || stored.canonicalUrl !== values.canonicalUrl || stored.introductionHtml !== values.introductionHtml || !isDeepStrictEqual(stored.supportingSections, values.supportingSections) || !isDeepStrictEqual(stored.faqItems, values.faqItems)) throw new Error("Saved page values did not match the submitted form.");
   } catch { redirect(`/admin/pages/${pageKey}?error=save`); }
   revalidatePath(pathname);
   revalidatePath("/admin/pages");

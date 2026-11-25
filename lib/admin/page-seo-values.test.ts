@@ -32,6 +32,21 @@ const page: PageSeoRecord = {
 };
 
 describe("buildPageSeoValues", () => {
+  it("reads explanation sections and FAQs from the visible submitted fields", () => {
+    const form = new FormData();
+    form.set("seoJson", JSON.stringify(page));
+    form.append("supportingHeading", "How it works");
+    form.append("supportingHtml", "<p>Multiply the bill by the tip percentage.</p>");
+    form.append("faqQuestion", "Is the tip included?");
+    form.append("faqAnswer", "Yes, the total includes the tip.");
+    const submitted = submittedPageSeo(form);
+    expect(submitted.supportingSections).toEqual([{ heading: "How it works", html: "<p>Multiply the bill by the tip percentage.</p>" }]);
+    expect(submitted.faqItems).toEqual([{ question: "Is the tip included?", answer: "Yes, the total includes the tip." }]);
+  });
+  it("persists and sanitizes explanation sections instead of dropping them on save", () => {
+    const result = buildPageSeoValues({ ...page, supportingSections: [{ heading: "How it works", html: '<p>Maths</p><script>bad()</script>' }] });
+    expect(result.supportingSections).toEqual([{ heading: "How it works", html: "<p>Maths</p>" }]);
+  });
   it("uses submitted fields even when the hidden snapshot is stale", () => {
     const form = new FormData();
     form.set("seoJson", JSON.stringify(page));
@@ -47,6 +62,7 @@ describe("buildPageSeoValues", () => {
       browserTitle: "Tip Calculator: Split a Bill",
       metaDescription: "Calculate a tip and split the total bill.",
       introductionHtml: "<p>Enter the bill.</p>",
+      supportingSections: [],
       canonicalUrl: "https://www.solocalculator.com/tip-calculator",
       breadcrumbLabel: "Tip",
       noIndex: false,

@@ -46,7 +46,7 @@ export const seoInputSchema = z.object({
   xCard: socialMetadataSchema.optional().default({ title: "", description: "", imageId: null }),
   schemaType: z.enum(["WebSite", "WebPage", "Article", "BlogPosting", "FAQPage", "HowTo", "SoftwareApplication", "WebApplication"]).optional().default("WebPage"),
   schemaProperties: z.record(z.string(), z.unknown()).optional().default({}),
-  faqItems: z.array(faqItemSchema).optional().default([]),
+  faqItems: z.array(faqItemSchema).max(30).optional().default([]),
 }).passthrough();
 
 export const postInputSchema = z.object({
@@ -68,7 +68,8 @@ export const postInputSchema = z.object({
 });
 
 export const pageSeoInputSchema = seoInputSchema.extend({
-  pageKey: z.string().min(1), pathname: z.string().regex(internalPathPattern), introductionHtml: z.string().default(""),
+  pageKey: z.string().min(1), pathname: z.string().regex(internalPathPattern), introductionHtml: z.string().max(100_000).default(""),
+  supportingSections: z.array(z.object({ heading: z.string().trim().min(1).max(180), html: z.string().max(100_000) })).max(20).default([]),
 });
 export const taxonomyInputSchema = z.object({ name: z.string().trim().min(1).max(100), slug: z.string().regex(slugPattern), description: z.string().max(600).default(""), seo: seoInputSchema });
 export const mediaInputSchema = z.object({

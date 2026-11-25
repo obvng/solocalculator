@@ -40,7 +40,7 @@ export function toNextMetadata(
   const title = seo.title.trim() || defaults.siteName;
   const description = seo.description.trim() || defaults.defaultDescription;
   const canonical = absoluteUrl(seo.canonical, pathname);
-  const openGraphImage = images?.openGraph || defaults.defaultImageUrl || (pathname.startsWith("/blog") ? null : DEFAULT_SOCIAL_IMAGE);
+  const openGraphImage = images?.openGraph || defaults.defaultImageUrl || DEFAULT_SOCIAL_IMAGE;
   const xCardImage = images?.xCard || openGraphImage;
 
   return {
